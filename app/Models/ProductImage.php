@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class ProductImage extends Model
 {
@@ -12,6 +13,10 @@ class ProductImage extends Model
     protected $casts = [
         'is_primary' => 'boolean'
     ];
+    protected $appends = [
+        'url',
+    ];
+
 
     public function product(): BelongsTo
     {
@@ -25,5 +30,12 @@ class ProductImage extends Model
                     ->update(['is_primary' => false]);
             }
         });
+    }
+    /**
+     * Accessor to get the full URL of the image
+     */
+    public function getUrlAttribute(): string
+    {
+        return Storage::url($this->image_path);
     }
 }
