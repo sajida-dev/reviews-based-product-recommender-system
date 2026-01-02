@@ -58,9 +58,6 @@ const popular = computed<MenuCategory[]>(() =>
     page.props.menuCategories?.popular?.data ?? []
 )
 
-console.log("New Arrivals:", newArrivals.value);
-console.log("Trending:", trending.value);
-console.log("Popular:", popular.value);
 
 </script>
 <template>

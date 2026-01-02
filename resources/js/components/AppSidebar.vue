@@ -12,7 +12,6 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import categories from '@/routes/categories'
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import {
@@ -34,34 +33,25 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: "Categories",
-        href: "/categories",
+        href: "/admin/categories",
         icon: Folder,
     },
     {
         title: "Products",
-        href: "/products",
+        href: "/admin/products",
         icon: Package,
     },
-    // {
-    //     title: "Carts",
-    //     href: "/carts",
-    //     icon: ShoppingCart,
-    // },
     {
         title: "Orders",
-        href: "/orders",
+        href: "/admin/orders",
         icon: ClipboardList,
     },
     {
         title: "Users",
-        href: "#",
+        href: "/admin/users",
         icon: Users,
     },
-    // {
-    //     title: "Wishlist",
-    //     href: "#",
-    //     icon: Heart,
-    // },
+
 ];
 
 

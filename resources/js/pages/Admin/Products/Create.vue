@@ -278,11 +278,11 @@ function submit() {
         return;
     }
 
-    form.post('/products', {
+    form.post('/admin/products', {
         forceFormData: true,
         onSuccess: () => {
             toast.success('Product created successfully');
-            router.visit('/products');
+            router.visit('/admin/products');
         },
         onError: () => {
             toast.error('Please fix the errors in the form.');
@@ -290,11 +290,11 @@ function submit() {
     });
 }
 
-function goBack() { router.visit('/products'); }
+function goBack() { router.visit('/admin/products'); }
 
 const breadcrumbItems: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/' },
-    { title: 'Products', href: '/products' },
-    { title: 'Add Product', href: '/products/create' },
+    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Products', href: '/admin/products' },
+    { title: 'Add Product', href: '/admin/products/create' },
 ];
 </script>

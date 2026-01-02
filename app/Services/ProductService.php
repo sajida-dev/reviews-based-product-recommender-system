@@ -3,97 +3,148 @@
 namespace App\Services;
 
 use App\Models\Product;
-use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductService
 {
-    /**
-     * Create a new class instance.
-     */
-    public function __construct(protected ProductImageService $imageService)
-    {
-        //
-    }
+    public function __construct(protected ProductImageService $imageService) {}
 
-    /** List products with relationships */
-    public function list(array $filters = [])
+    /* =========================
+       LISTING
+    ========================== */
+
+    /** Public listing */
+    public function publicList(array $filters = [])
     {
         return Product::query()
-            ->with(['category:id,name', 'images:id,product_id,image_path,is_primary'])
+            ->where('is_active', true)
+            ->with(['category:id,name', 'images'])
             ->when(
-                filled($filters['search'] ?? null),
-                fn($q) => $q->where('name', 'like', '%' . $filters['search'] . '%')
+                $filters['search'] ?? null,
+                fn($q, $v) => $q->where('name', 'like', "%$v%")
             )
             ->when(
-                filled($filters['category_id'] ?? null),
-                fn($q) => $q->where('category_id', $filters['category_id'])
+                $filters['category_id'] ?? null,
+                fn($q, $v) => $q->where('category_id', $v)
             )
-            ->orderByDesc('id')
-            ->paginate(20)
-            ->withQueryString();
+            ->latest()
+            ->paginate(12)
+            ->through(fn($product) => $this->transformForPublic($product));
     }
 
-    /** Get single product */
-    public function findOrFail(int $id)
+    /** Admin listing */
+    public function adminList(array $filters = [])
     {
-        return Product::with(['category', 'images'])->findOrFail($id);
+        return Product::query()
+            ->with('category:id,name')
+            ->latest()
+            ->paginate(20)
+            ->through(fn($product) => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
+                'slug' => $product->slug,
+                'stock' => $product->stock,
+                'is_active' => $product->is_active,
+                'description' => $product->description,
+                'category' => $product->category?->name,
+                'discount_price' => 'Rs ' . $product->discount_price,
+                'effective_price' => 'Rs ' . $product->effective_price,
+                'discount_percentage' => $product->discount_percentage . '%',
+                'primary_image' => optional(
+                    $product->images->firstWhere('is_primary', true)
+                ) ? Storage::url($product->images->firstWhere('is_primary', true)->image_path) : null,
+                'attributes' => $product->attributes ?? [],
+            ]);
+    }
+    public function getLatestProducts($limit = 6)
+    {
+        return Product::with('category', 'images')
+            ->take($limit)
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'category' => $product->category->name ?? '',
+                    'price' => $product->price,
+                    'discountedPrice' => $product->discount_amount,
+                    'discountPercentage' => $product->discount_percentage ?? 0,
+                    'mainImage' => $product->images->first()->url ?? '/img/default.png',
+                    'images' => $product->images->pluck('url')->toArray(),
+                    'inStock' => $product->stock > 0,
+                ];
+            });
     }
 
-    /** Create product with transaction & images */
-    public function create(array $data)
+    /* =========================
+       SINGLE PRODUCT
+    ========================== */
+
+    public function findBySlug(string $slug): Product
+    {
+        return Product::where('slug', $slug)
+            ->where('is_active', true)
+            ->with([
+                'category',
+                'images',
+                'reviews.user'
+            ])
+            ->firstOrFail();
+    }
+
+    public function findById(int $id): Product
+    {
+        return Product::with(['category', 'images', 'reviews.user'])
+            ->findOrFail($id);
+    }
+
+    /* =========================
+       CRUD
+    ========================== */
+
+    public function create(array $data): Product
     {
         return DB::transaction(function () use ($data) {
+            $data['slug'] = Str::slug($data['name']);
 
             $images = $data['images'] ?? [];
-            $primaryIndex = $data['primary_image'] ?? null;
+            $primary = $data['primary_image'] ?? null;
 
             unset($data['images'], $data['primary_image']);
-            $data['slug'] = Str::slug($data['name']);
 
             $product = Product::create($data);
 
             if ($images) {
-                $this->imageService->store(
-                    $product,
-                    $images,
-                    $primaryIndex
-                );
+                $this->imageService->store($product, $images, $primary);
             }
 
-            return $product->load('images', 'category');
+            return $product;
         });
     }
 
-    /** Update product safely */
-    public function update(int $id, array $data)
+    public function update(int $id, array $data): Product
     {
-        return DB::transaction(
-            function () use ($id, $data) {
+        return DB::transaction(function () use ($id, $data) {
+            $product = Product::findOrFail($id);
 
-                $product = Product::lockForUpdate()->findOrFail($id);
+            $images = $data['images'] ?? null;
+            $primary = $data['primary_image'] ?? null;
 
-                $images = $data['images'] ?? null;
-                $primaryIndex = $data['primary_image'] ?? null;
+            unset($data['images'], $data['primary_image']);
 
-                unset($data['images'], $data['primary_image']);
+            $product->update($data);
 
-                $product->update($data);
-
-                if (is_array($images)) {
-                    $this->imageService->replace(
-                        $product,
-                        $images,
-                        $primaryIndex
-                    );
-                }
-                return $product->load('images', 'category');
+            if (is_array($images)) {
+                $this->imageService->replace($product, $images, $primary);
             }
-        );
+
+            return $product;
+        });
     }
 
-    /** Delete product safely */
     public function delete(int $id): void
     {
         DB::transaction(function () use ($id) {
@@ -101,5 +152,25 @@ class ProductService
             $product->images()->delete();
             $product->delete();
         });
+    }
+
+    /* =========================
+       HELPERS
+    ========================== */
+
+    private function transformForPublic(Product $product): array
+    {
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'slug' => $product->slug,
+            'price' => (float) $product->price,
+            'effective_price' => (float) $product->effective_price,
+            'discount_percentage' => $product->discount_percentage,
+            'category' => $product->category?->name,
+            'image' => $product->images->first()?->url,
+            'attributes' => $product->attributes ?? [],
+            'is_sellable' => $product->stock > 0,
+        ];
     }
 }

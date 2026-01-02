@@ -24,6 +24,7 @@ class Review extends Model
         'verified_purchase' => 'boolean',
         'is_approved' => 'boolean',
     ];
+    protected $with = ['user'];
 
     public function user(): BelongsTo
     {
@@ -33,5 +34,9 @@ class Review extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+    public function getAvatarUrlAttribute()
+    {
+        return $this->avatar ?? 'https://i.pravatar.cc/40?u=' . $this->id;
     }
 }

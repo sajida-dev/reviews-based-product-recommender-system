@@ -15,13 +15,16 @@ class ForceTwoFactorSetup
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (
-            $request->user() &&
-            $request->user()->is_admin &&
-            ! $request->user()->hasEnabledTwoFactorAuthentication()
-        ) {
-            return redirect()->route('two-factor.show');
+        if ($request->user()) {
+            if ($request->user()->is_admin) {
+                if (! $request->user()->hasEnabledTwoFactorAuthentication()) {
+                    return redirect()->route('two-factor.show');
+                }
+            } else {
+                return redirect()->route('home');
+            }
         }
+
         return $next($request);
     }
 }

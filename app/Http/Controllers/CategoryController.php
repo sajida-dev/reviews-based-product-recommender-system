@@ -17,7 +17,7 @@ class CategoryController extends Controller
 
     public function index()
     {
-        return Inertia::render('Categories/Index', [
+        return Inertia::render('Admin/Categories/Index', [
             'categories' => $this->service->list(),
             'parentOptions' => $this->service->parentOptions(),
         ]);

@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import AppLogo from '@/components/AppLogo.vue';
+import AdsCards from '@/components/AdsCards.vue';
+import DiscountOffer from '@/components/DiscountOffer.vue';
+import FeatureProductsSection from '@/components/FeatureProductsSection.vue';
+import FeatureSection from '@/components/FeatureSection.vue';
+import Footer from '@/components/layouts/Footer.vue';
 import PublicHeader from '@/components/layouts/PublicHeader.vue';
-import { dashboard, login, register } from '@/routes';
+import Reviews from '@/components/Reviews.vue';
+import WhyUs from '@/components/WhyUs.vue';
+import { login, register } from '@/routes';
 import { Head, Link } from '@inertiajs/vue3';
 
 withDefaults(
@@ -12,6 +18,79 @@ withDefaults(
         canRegister: true,
     },
 );
+
+
+const productCards = [
+    {
+        offer: "Upto 30% Off",
+        title: "Men’s Sneakers",
+        image: "/img/headphones.png",
+        button: "SHOP NOW",
+    },
+    {
+        offer: "Flat 20% Off",
+        title: "Women’s Heels",
+        image: "/img/headphones.png",
+        button: "SHOP NOW",
+    },
+];
+const onFormSubmit = (data: any) => {
+    console.log("Form Submitted:", data);
+    // You can send this to backend or show a success message
+};
+const handleSocial = (icon: string) => {
+    console.log("Clicked social icon:", icon);
+};
+
+const handleLinkClick = (link: string) => {
+    console.log("Clicked footer link:", link);
+};
+
+const features = [
+    {
+        icon: 'fa-solid fa-cart-shopping',
+        title: 'Pick Up In Store',
+        description: 'At imperdiet dui accumsan sit amet nulla risus est ultricies quis.'
+    },
+    {
+        icon: 'fa-solid fa-gift',
+        title: 'Special Packaging',
+        description: 'At imperdiet dui accumsan sit amet nulla risus est ultricies quis.'
+    },
+    {
+        icon: 'fa-solid fa-store',
+        title: 'Free Global Returns',
+        description: 'At imperdiet dui accumsan sit amet nulla risus est ultricies quis.'
+    }
+]
+const features5 = [
+    {
+        icon: 'fa-solid fa-cart-shopping',
+        title: 'Free delivery',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipi elit.'
+    },
+    {
+        icon: 'fa-solid fa-shield-halved',
+        title: '100% secure payment',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipi elit.'
+    },
+    {
+        icon: 'fa-solid fa-store',
+        title: 'Quality guarantee',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipi elit.'
+    },
+    {
+        icon: 'fa-solid fa-heart-circle-check',
+        title: 'Guaranteed savings',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipi elit.'
+    },
+    {
+        icon: 'fa-solid fa-gift',
+        title: 'Daily offers',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipi elit.'
+    }
+]
+
 </script>
 
 <template>
@@ -46,6 +125,24 @@ withDefaults(
             </div>
         </div>
     </div>
+    <div class="bg-neutral-900 max-w-full py-20">
+        <AdsCards :cards="productCards" />
+    </div>
+    <div class="bg-neutral-900 max-w-full pb-15">
+        <FeatureSection :features="features" />
+    </div>
+    <div class="bg-neutral-900 max-w-full py-15">
+        <FeatureProductsSection />
+    </div>
+    <div class="bg-neutral-900 max-w-full py-15">
+        <DiscountOffer :discountPercent="30"
+            description="Sign up today and receive an exclusive 30% discount code for your first order!"
+            @submit="onFormSubmit" />
+    </div>
+    <div class="bg-neutral-900 max-w-full pb-15">
+        <WhyUs :features="features5" />
+    </div>
+    <Footer logo-text="E-Com" @social-click="handleSocial" @link-click="handleLinkClick" />
 </template>
 
 <style scoped>

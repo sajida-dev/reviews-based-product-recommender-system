@@ -15,7 +15,7 @@ class ReviewController extends Controller
     public function store(ReviewRequest $request)
     {
         try {
-            $this->service->save(
+            $review = $this->service->save(
                 $request->user()->id,
                 $request->product_id,
                 $request->rating,
@@ -23,8 +23,9 @@ class ReviewController extends Controller
                 true,
                 false
             );
+            $review->load('user');
 
-            return back()->with('success', 'Review submitted successfully.');
+            return back()->with(['success' => 'Review submitted successfully.', 'newReview' => $review]);
         } catch (Throwable $e) {
             report($e);
             return back()->withErrors($e->getMessage());

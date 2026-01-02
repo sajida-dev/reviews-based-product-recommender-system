@@ -1,5 +1,5 @@
 <template>
-    <AppLayout>
+    <AppLayout :breadcrumbs="breadcrumbItems">
 
         <Head title="Categories" />
 
@@ -105,7 +105,11 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import TextInput from '@/components/form/TextInput.vue'
 import SelectInput from '@/components/form/SelectInput.vue'
-
+import { BreadcrumbItem } from '@/types'
+const breadcrumbItems: BreadcrumbItem[] = [
+    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Categories', href: '/admin/categories' },
+];
 interface Category {
     id: number
     name: string
