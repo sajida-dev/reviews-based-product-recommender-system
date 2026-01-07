@@ -7,9 +7,6 @@ import type { PageProps as InertiaPageProps } from '@inertiajs/core'
 const show = ref(false)
 const megaMenuButtonRef = ref<HTMLDivElement | null>(null)
 
-const toggleMegaMenu = () => {
-    show.value = !show.value
-}
 interface PageProps extends InertiaPageProps {
     menuCategories: {
         new: {
@@ -42,11 +39,6 @@ onMounted(() => {
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside)
 })
-
-
-
-// const page = usePage()
-
 
 const newArrivals = computed<MenuCategory[]>(() =>
     page.props.menuCategories?.new?.data ?? []

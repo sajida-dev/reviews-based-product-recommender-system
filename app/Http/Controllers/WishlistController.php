@@ -20,22 +20,24 @@ class WishlistController extends Controller
         ]);
     }
 
-    public function store(WishlistRequest $request)
+    public function toggle(Request $request)
     {
-        try {
-            $this->service->add($request->user()->id, $request->product_id);
-            return back()->with('success', 'Product added to wishlist');
-        } catch (Throwable $e) {
-            report($e);
-            return back()->withErrors($e->getMessage());
-        }
-    }
+        $userId = $request->user()->id;
+        $productId = $request->input('product_id');
 
-    public function destroy(Request $request, int $productId)
-    {
+        $wishlistItem = $this->service->getAll($userId)
+            ->firstWhere('id', $productId);
+
         try {
-            $this->service->remove($request->user()->id, $productId);
-            return back()->with('success', 'Product removed from wishlist');
+            if ($wishlistItem) {
+                $this->service->remove($userId, $productId);
+                $added = false;
+            } else {
+                $this->service->add($userId, $productId);
+                $added = true;
+            }
+
+            return back()->with('success', $added ? 'Product added to wishlist' : 'Product removed from wishlist');
         } catch (Throwable $e) {
             report($e);
             return back()->withErrors($e->getMessage());

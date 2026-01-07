@@ -5,6 +5,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
+import { createPinia } from 'pinia';
 import { initializeTheme } from './composables/useAppearance';
 import Vue3Toastify from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
@@ -21,8 +22,10 @@ createInertiaApp({
             import.meta.glob<DefineComponent>('./pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
+        const pinia = createPinia()
         createApp({ render: () => h(App, props) })
             .use(plugin)
+            .use(pinia)
             .use(ZiggyVue)
             .use(Vue3Toastify, {
                 autoClose: 3000,

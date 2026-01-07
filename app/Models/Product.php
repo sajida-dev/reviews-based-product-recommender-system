@@ -60,6 +60,10 @@ class Product extends Model
     {
         return $this->hasMany(Wishlist::class);
     }
+    public function primaryImage()
+    {
+        return $this->hasOne(ProductImage::class)->where('is_primary', true);
+    }
 
     /* Scopes */
     public function scopeSearch($q, $term)

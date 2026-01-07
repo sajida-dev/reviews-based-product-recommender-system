@@ -1,9 +1,9 @@
 <template>
     <footer class="bg-neutral-900 text-neutral-300 border-t border-neutral-700 px-6 py-12">
-        <div class="max-w-6xl mx-auto flex flex-wrap justify-between gap-10">
+        <div class="max-w-6xl mx-auto flex flex-wrap md:justify-between justify-center gap-10 text-center">
 
             <!-- Logo + Social Icons -->
-            <div class="flex flex-col gap-4 min-w-[180px]">
+            <div class="flex flex-col gap-4 min-w-[180px] items-center ">
                 <div class="flex items-center gap-2">
                     <AppLogo />
                 </div>
@@ -16,7 +16,7 @@
             </div>
 
             <!-- Footer Links -->
-            <div v-for="(column, index) in footerLinks" :key="index" class="flex flex-col gap-2 min-w-[180px]">
+            <div v-for="(column, index) in footerLinks" :key="index" class="flex flex-col gap-2 min-w-[180px] ">
                 <h3 class="text-white font-semibold text-lg">{{ column.title }}</h3>
                 <ul class="flex flex-col gap-2">
                     <li v-for="(item, i) in column.items" :key="i" @click="$emit('link-click', item)"
@@ -27,7 +27,7 @@
             </div>
 
             <!-- Subscribe -->
-            <div class="flex-1 min-w-[220px] flex flex-col gap-3">
+            <div class="flex-1 min-w-[220px] flex flex-col gap-3 text-left">
                 <h3 class="text-white font-semibold text-lg">{{ subscribeTitle }}</h3>
                 <p class="text-neutral-400 text-sm">{{ subscribeText }}</p>
                 <div class="flex gap-2">

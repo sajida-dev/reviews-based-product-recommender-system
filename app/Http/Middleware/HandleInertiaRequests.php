@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use App\Models\Category;
 use App\Http\Resources\CategoryMenuResource;
+use App\Services\CartService;
+use App\Services\WishlistService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -40,24 +42,33 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $cartService = app(CartService::class);
+        $wishlistService = app(WishlistService::class);
+
+        $user = $request->user();
+
+        // Prepare cart and wishlist only once per request
+        $cartItems = $user ? $cartService->getAll($user->id) : collect();
+        $wishlistItems = $user ? $wishlistService->getAll($user->id) : collect();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'menuCategories' => fn() => [
-                'new' => CategoryMenuResource::collection(
-                    Category::newArrivals()->get()
-                ),
-                'trending' => CategoryMenuResource::collection(
-                    Category::trending()->get()
-                ),
-                'popular' => CategoryMenuResource::collection(
-                    Category::popular()->get()
-                ),
+                'new' => CategoryMenuResource::collection(Category::newArrivals()->get()),
+                'trending' => CategoryMenuResource::collection(Category::trending()->get()),
+                'popular' => CategoryMenuResource::collection(Category::popular()->get()),
+            ],
+            'shop' => [
+                'cart' => fn() => $cartItems,
+                'cartCount' => fn() => $cartItems->sum('quantity'),
+                'wishlist' => fn() => $wishlistItems,
+                'wishlistCount' => fn() => $wishlistItems->count(),
             ],
         ];
     }

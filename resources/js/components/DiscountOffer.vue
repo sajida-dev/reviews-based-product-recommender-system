@@ -1,8 +1,9 @@
 <template>
-    <section class="max-w-7xl mx-auto mt-10 px-15 py-30 bg-yellow-400 rounded-md flex flex-col md:flex-row gap-10">
+    <section
+        class="max-w-7xl md:mx-auto mx-5 md:px-15 px-5 md:py-30 py-10 bg-white/60 backdrop-blur-md border border-white/30 rounded-md flex flex-col md:flex-row gap-10">
         <!-- Text Section -->
-        <div class="flex-1 text-gray-900">
-            <h1 class="text-5xl md:text-6xl font-bold leading-tight mb-4">
+        <div class="flex-1 text-gray-900 text-center md:text-left">
+            <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4">
                 Get <span class="text-red-600">{{ discountPercent }}% Discount</span><br />
                 on your first purchase
             </h1>
@@ -23,7 +24,7 @@
                 <!-- Subscribe Checkbox -->
                 <label class="flex items-center gap-2 text-gray-900 text-sm">
                     <input type="checkbox" v-model="form.subscribe"
-                        class="w-4 h-4 text-yellow-500 rounded border-gray-300 focus:ring-2 focus:ring-yellow-400" />
+                        class="w-4 h-4 text-white rounded border-gray-300 focus:ring-2 focus:ring-white" />
                     Subscribe to the newsletter
                 </label>
 

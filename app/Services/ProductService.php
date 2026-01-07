@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Models\Wishlist;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -16,22 +17,23 @@ class ProductService
     ========================== */
 
     /** Public listing */
-    public function publicList(array $filters = [])
+    public function publicList(array $filters = [], ?int $userId = null)
     {
+        $wishlistProductIds = collect();
+
+        if ($userId) {
+            $wishlistProductIds = Wishlist::where('user_id', $userId)
+                ->pluck('product_id');
+        }
+
         return Product::query()
             ->where('is_active', true)
             ->with(['category:id,name', 'images'])
-            ->when(
-                $filters['search'] ?? null,
-                fn($q, $v) => $q->where('name', 'like', "%$v%")
-            )
-            ->when(
-                $filters['category_id'] ?? null,
-                fn($q, $v) => $q->where('category_id', $v)
-            )
+            ->when($filters['search'] ?? null, fn($q, $v) => $q->where('name', 'like', "%{$v}%"))
+            ->when($filters['category_id'] ?? null, fn($q, $v) => $q->where('category_id', $v))
             ->latest()
             ->paginate(12)
-            ->through(fn($product) => $this->transformForPublic($product));
+            ->through(fn(Product $product) => $this->transformForPublic($product, $wishlistProductIds));
     }
 
     /** Admin listing */
@@ -41,42 +43,42 @@ class ProductService
             ->with('category:id,name')
             ->latest()
             ->paginate(20)
-            ->through(fn($product) => [
-                'id' => $product->id,
-                'name' => $product->name,
-                'price' => $product->price,
-                'slug' => $product->slug,
-                'stock' => $product->stock,
-                'is_active' => $product->is_active,
-                'description' => $product->description,
-                'category' => $product->category?->name,
-                'discount_price' => 'Rs ' . $product->discount_price,
-                'effective_price' => 'Rs ' . $product->effective_price,
-                'discount_percentage' => $product->discount_percentage . '%',
-                'primary_image' => optional(
-                    $product->images->firstWhere('is_primary', true)
-                ) ? Storage::url($product->images->firstWhere('is_primary', true)->image_path) : null,
-                'attributes' => $product->attributes ?? [],
-            ]);
+            ->through(fn($product) => $this->transformForAdmin($product));
     }
-    public function getLatestProducts($limit = 6)
+
+    /** Latest products for homepage */
+    public function getLatestProducts(int $limit = 6, ?int $userId = null)
     {
-        return Product::with('category', 'images')
+        $wishlistProductIds = collect();
+
+        if ($userId) {
+            $wishlistProductIds = Wishlist::where('user_id', $userId)
+                ->pluck('product_id');
+        }
+
+        return Product::with(['category', 'images'])
+            ->latest()
             ->take($limit)
             ->get()
-            ->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'category' => $product->category->name ?? '',
-                    'price' => $product->price,
-                    'discountedPrice' => $product->discount_amount,
-                    'discountPercentage' => $product->discount_percentage ?? 0,
-                    'mainImage' => $product->images->first()->url ?? '/img/default.png',
-                    'images' => $product->images->pluck('url')->toArray(),
-                    'inStock' => $product->stock > 0,
-                ];
-            });
+            ->map(fn(Product $product) => $this->transformForPublic($product, $wishlistProductIds));
+    }
+
+    /** Home page ad products */
+    public function getHomeAdProducts(int $limit = 2)
+    {
+        return Product::where('is_active', true)
+            ->with('images')
+            ->inRandomOrder()
+            ->take($limit)
+            ->get()
+            ->map(fn(Product $product) => [
+                'id' => $product->id,
+                'title' => $product->name,
+                'slug' => $product->slug,
+                'image' => $product->images->first()?->url ?? '/img/default.png',
+                'offer' => $product->discount_percentage ?? 0,
+                'button' => 'SHOP NOW',
+            ]);
     }
 
     /* =========================
@@ -87,11 +89,7 @@ class ProductService
     {
         return Product::where('slug', $slug)
             ->where('is_active', true)
-            ->with([
-                'category',
-                'images',
-                'reviews.user'
-            ])
+            ->with(['category', 'images', 'reviews.user'])
             ->firstOrFail();
     }
 
@@ -109,10 +107,8 @@ class ProductService
     {
         return DB::transaction(function () use ($data) {
             $data['slug'] = Str::slug($data['name']);
-
             $images = $data['images'] ?? [];
             $primary = $data['primary_image'] ?? null;
-
             unset($data['images'], $data['primary_image']);
 
             $product = Product::create($data);
@@ -129,10 +125,8 @@ class ProductService
     {
         return DB::transaction(function () use ($id, $data) {
             $product = Product::findOrFail($id);
-
             $images = $data['images'] ?? null;
             $primary = $data['primary_image'] ?? null;
-
             unset($data['images'], $data['primary_image']);
 
             $product->update($data);
@@ -158,19 +152,41 @@ class ProductService
        HELPERS
     ========================== */
 
-    private function transformForPublic(Product $product): array
+    private function transformForPublic(Product $product, $wishlistProductIds): array
+    {
+        return [
+            'id' => $product->id,
+            'slug' => $product->slug,
+            'name' => $product->name,
+            'category' => $product->category->name ?? '',
+            'price' => (float) $product->price,
+            'discountedPrice' => (float) $product->discount_amount,
+            'discountPercentage' => $product->discount_percentage ?? 0,
+            'mainImage' => $product->images->first()?->url ?? '/img/default.png',
+            'images' => $product->images->pluck('url')->toArray(),
+            'inStock' => $product->stock > 0,
+            'attributes' => $product->attributes ?? [],
+            'isWishlisted' => $wishlistProductIds->contains($product->id),
+        ];
+    }
+
+    private function transformForAdmin(Product $product): array
     {
         return [
             'id' => $product->id,
             'name' => $product->name,
             'slug' => $product->slug,
-            'price' => (float) $product->price,
-            'effective_price' => (float) $product->effective_price,
-            'discount_percentage' => $product->discount_percentage,
+            'price' => $product->price,
+            'discountedPrice' => $product->discount_amount,
+            'discountPercentage' => $product->discount_percentage,
+            'effectivePrice' => $product->effective_price,
+            'stock' => $product->stock,
+            'is_active' => $product->is_active,
+            'description' => $product->description,
             'category' => $product->category?->name,
-            'image' => $product->images->first()?->url,
+            'mainImage' => $product->images->first()?->url ?? '/img/default.png',
+            'images' => $product->images->pluck('url')->toArray(),
             'attributes' => $product->attributes ?? [],
-            'is_sellable' => $product->stock > 0,
         ];
     }
 }

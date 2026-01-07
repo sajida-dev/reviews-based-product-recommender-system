@@ -36,8 +36,17 @@ class WishlistService
      */
     public function getAll(int $userId)
     {
-        return Wishlist::with('product')
+        return Wishlist::with(['product.primaryImage'])
             ->where('user_id', $userId)
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                $product = $item->product;
+                return [
+                    'id' => $item->id,
+                    'name' => $product->name ?? 'Unknown',
+                    'price' => $product->price ?? 0,
+                    'image' => $product->primaryImage?->url ?? '/images/fallback.png',
+                ];
+            });
     }
 }

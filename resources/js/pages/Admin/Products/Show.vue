@@ -98,12 +98,7 @@
 
         <!-- Recommended Products -->
         <section class="mt-16">
-            <!-- <RecommendedProducts :currentProductId="product.id" /> -->
-            <div class="container">
-                <NormalCard :product="product" />
-                <DarkCard :product="product" />
-                <DiscountCard :product="product" />
-            </div>
+            <FeatureProductsSection :products="latestProducts" />
         </section>
 
         <!-- Product Reviews -->
@@ -125,11 +120,12 @@ import NormalCard from '@/components/NormalCard.vue'
 import DarkCard from '@/components/DarkCard.vue'
 import DiscountCard from '@/components/DiscountCard.vue'
 import Reviews from '@/components/Reviews.vue'
+import FeatureProductsSection from '@/components/FeatureProductsSection.vue'
 
 const page = usePage<any>()
 const product = page.props.product
 const reviews = page.props.initialReviews
-
+const latestProducts = page.props.latestProducts
 // Image gallery
 const selectedIndex = ref(product.images.findIndex((i: any) => i.is_primary) || 0)
 const selectedImage = computed(() => product.images[selectedIndex.value]?.url || '')

@@ -1,44 +1,28 @@
 <script setup lang="ts">
-import DarkProductCard from '@/components/DarkProductCard.vue';
-const addToCart = (product: any) => {
-    console.log('Add to cart:', product)
-}
+import DarkProductCard from '@/components/DarkProductCard.vue'
+import { usePage } from '@inertiajs/vue3'
+import type { Product } from '@/types/product'
 
-const toggleWishlist = (product: any) => {
-    console.log('Toggle wishlist:', product)
-}
+const page = usePage()
+
+const products: Product[] = page.props.products?.data ?? []
 </script>
 
-<template>
-    <!-- product listing -->
-    <div class="container mx-auto my-16 grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <DarkProductCard :product="{
-            name: 'Nike Air Max 270',
-            category: 'Women Shoes',
-            price: 16999,
-            discountPercentage: 10,
-            mainImage: '/img/headphones.png',
-            images: ['/img/headphones.png', '/img/headphones.png', '/img/headphones.png'],
-            inStock: true
-        }" @add-to-cart="addToCart" @toggle-wishlist="toggleWishlist" />
-        <DarkProductCard :product="{
-            name: 'Nike Air Max 270',
-            category: 'Women Shoes',
-            price: 16999,
-            discountPercentage: 10,
-            mainImage: '/img/headphones.png',
-            images: ['/img/headphones.png', '/img/headphones.png', '/img/headphones.png'],
-            inStock: true
-        }" @add-to-cart="addToCart" @toggle-wishlist="toggleWishlist" />
-        <DarkProductCard :product="{
-            name: 'Nike Air Max 270',
-            category: 'Women Shoes',
-            price: 16999,
-            discountPercentage: 10,
-            mainImage: '/img/headphones.png',
-            images: ['/img/headphones.png', '/img/headphones.png', '/img/headphones.png'],
-            inStock: true
-        }" @add-to-cart="addToCart" @toggle-wishlist="toggleWishlist" />
-    </div>
 
+<template>
+    <PublicLayout hero-title="Discover Your Next Adventure" url="'/bg/auth-bg.jpg'"
+        hero-subtitle="Browse our wide range of products and find something you love." :hero-buttons="[
+            { label: 'Shop Now', href: '/products', primary: true },
+            { label: 'Contact Us', href: '/contact' }
+        ]">
+
+
+        <!-- product listing -->
+        <div class="container mx-auto my-16 grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <DarkProductCard v-for="product in products" :key="product.id" :product="product" />
+            </div>
+        </div>
+    </PublicLayout>
 </template>

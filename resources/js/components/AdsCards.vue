@@ -1,37 +1,20 @@
 <template>
     <div class="card-container">
         <ProductAdCard v-for="(item, index) in cards" :key="index" :offer-text="item.offer" :title="item.title"
-            :image="item.image" :button-text="item.button" @click="onCardClick" />
+            :image="item.image" :slug="item.slug" :button-text="item.button" @click="onCardClick" />
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { Card } from "@/types/product";
 import ProductAdCard from "./ProductAdCard.vue";
 
-const props = defineProps({
-    cards: {
-        type: Array,
-        default: () => [
-            {
-                offer: "Upto 25% Off",
-                title: "Sports Shoes",
-                image:
-                    "/img/headphones.png",
-                button: "SHOP NOW",
-            },
-            {
-                offer: "Upto 25% Off",
-                title: "Kids Collection",
-                image:
-                    "/img/headphones.png",
-                button: "SHOP NOW",
-            },
-        ],
-    },
-});
+const props = defineProps<{ cards: Card[] }>();
+const cards = props.cards ?? [];
 
-const onCardClick = (title) => {
-    alert(`Clicked on: ${title}`);
+
+const onCardClick = (title: string) => {
+    console.log(`Clicked on: ${title}`);
 };
 </script>
 

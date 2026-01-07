@@ -25,7 +25,9 @@ class ReviewController extends Controller
             );
             $review->load('user');
 
-            return back()->with(['success' => 'Review submitted successfully.', 'newReview' => $review]);
+            return redirect()->back()->with([
+                'newReview' => $review
+            ]);
         } catch (Throwable $e) {
             report($e);
             return back()->withErrors($e->getMessage());

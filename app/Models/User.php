@@ -40,6 +40,16 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected $appends = ['avatar_url'];
+
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar) {
+            return asset('storage/avatars/' . $this->avatar);
+        }
+        return 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($this->name))) . '?d=identicon';
+    }
+
     /**
      * Get the attributes that should be cast.
      *

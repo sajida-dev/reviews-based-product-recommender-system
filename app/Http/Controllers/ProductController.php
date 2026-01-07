@@ -22,9 +22,11 @@ class ProductController extends Controller
     /** Public product listing */
     public function index(Request $request)
     {
+        $userId = $request->user()?->id ?? null;
         return Inertia::render('Products/Index', [
             'products' => $this->service->publicList(
-                $request->only('search', 'category_id')
+                $request->only('search', 'category_id'),
+                $userId
             ),
             'categories' => Category::select('id', 'name')->get(),
             'filters' => $request->only('search', 'category_id'),
@@ -60,8 +62,10 @@ class ProductController extends Controller
     /** Admin detail */
     public function adminShow(int $id)
     {
+        $products = $this->service->getLatestProducts(6);
         return Inertia::render('Admin/Products/Show', [
             'product' => $this->service->findById($id),
+            'latestProducts' => $products,
         ]);
     }
 

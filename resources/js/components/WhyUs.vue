@@ -2,7 +2,7 @@
     <h1 class="text-4xl lg:text-5xl font-extrabold text-white text-center mb-2 drop-shadow-lg">Why Us</h1>
     <hr class="w-25 mx-auto pb-15 ">
     <section
-        class="features-section max-w-full   mx-auto flex flex-wrap justify-center gap-10 py-15 px-6  text-neutral-200">
+        class="features-section max-w-full mx-5 md:mx-auto flex flex-wrap justify-center gap-10 py-15 px-6  text-neutral-200">
         <FeatureBox v-for="(feature, index) in features" :key="index" :icon="feature.icon" :title="feature.title"
             :description="feature.description" />
     </section>
