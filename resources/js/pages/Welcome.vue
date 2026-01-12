@@ -78,9 +78,7 @@ const features5 = [
 
 
 const page = usePage()
-// const products: Product[] = page.props.products ?? []
-// console.log('page.props.products', page.props.products)
-// const adProducts = page.props.adProducts
+
 const products: Product[] = mapProducts(page.props.products ?? [])
 
 const adProducts: Card[] = mapAdProducts(page.props.adProducts as any[] ?? []);

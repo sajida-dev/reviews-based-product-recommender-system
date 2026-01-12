@@ -47,7 +47,6 @@ class HandleInertiaRequests extends Middleware
 
         $user = $request->user();
 
-        // Prepare cart and wishlist only once per request
         $cartItems = $user ? $cartService->getAll($user->id) : collect();
         $wishlistItems = $user ? $wishlistService->getAll($user->id) : collect();
 

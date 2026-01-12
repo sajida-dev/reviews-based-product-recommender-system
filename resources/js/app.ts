@@ -30,7 +30,6 @@ createInertiaApp({
             .use(Vue3Toastify, {
                 autoClose: 3000,
                 position: "top-right",
-                // theme: "light",
             })
             .component('EasyDataTable', Vue3EasyDataTable)
             .mount(el);

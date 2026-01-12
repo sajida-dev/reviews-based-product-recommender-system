@@ -2,7 +2,7 @@
     <div class="relative flex items-center gap-3">
 
         <!-- CART ICON -->
-        <button @click="toggleCart" aria-label="Toggle Cart"
+        <button ref="cartButton" @click="toggleCart" aria-label="Toggle Cart"
             class="relative px-2 py-1 rounded-full hover:bg-white/20 transition">
             <i class="fa-solid fa-cart-shopping text-white text-lg"></i>
 
@@ -13,7 +13,7 @@
         </button>
 
         <!-- WISHLIST ICON -->
-        <button @click="toggleWishlist" aria-label="Toggle Wishlist"
+        <button ref="wishlistButton" @click="toggleWishlist" aria-label="Toggle Wishlist"
             class="relative px-2 py-1 rounded-full hover:bg-white/20 transition">
             <i class="fa-solid fa-heart text-white text-lg"></i>
 
@@ -25,7 +25,7 @@
 
         <!-- CART POPUP -->
         <transition name="fade">
-            <div v-if="showCart" class="absolute right-0 top-full mt-3 w-80
+            <div ref="cartPopup" v-if="showCart" class="absolute right-0 top-full mt-3 w-80
           rounded-xl bg-neutral-900/95 backdrop-blur border border-neutral-700 shadow-2xl z-50">
 
                 <div class="p-4 border-b border-neutral-700 text-white font-semibold">
@@ -71,7 +71,7 @@
 
         <!-- WISHLIST POPUP -->
         <transition name="fade">
-            <div v-if="showWishlist" class="absolute right-0 top-full mt-3 w-80
+            <div ref="wishlistPopup" v-if="showWishlist" class="absolute right-0 top-full mt-3 w-80
           rounded-xl bg-neutral-900/95 backdrop-blur border border-neutral-700 shadow-2xl z-50">
                 <div class="p-4 border-b border-neutral-700 text-white font-semibold">Wishlist</div>
 
@@ -145,7 +145,39 @@ export default {
         },
         goToCheckout() {
             this.$emit('checkout');
+        },
+        handleClickOutside(event) {
+            const cartPopup = this.$refs.cartPopup;
+            const wishlistPopup = this.$refs.wishlistPopup;
+            const cartButton = this.$refs.cartButton;
+            const wishlistButton = this.$refs.wishlistButton;
+
+            if (
+                this.showCart &&
+                cartPopup &&
+                !cartPopup.contains(event.target) &&
+                cartButton &&
+                !cartButton.contains(event.target)
+            ) {
+                this.$emit('toggle-cart', false); // close cart
+            }
+
+            if (
+                this.showWishlist &&
+                wishlistPopup &&
+                !wishlistPopup.contains(event.target) &&
+                wishlistButton &&
+                !wishlistButton.contains(event.target)
+            ) {
+                this.$emit('toggle-wishlist', false); // close wishlist
+            }
         }
+    },
+    mounted() {
+        document.addEventListener('click', this.handleClickOutside);
+    },
+    beforeUnmount() {
+        document.removeEventListener('click', this.handleClickOutside);
     }
 }
 </script>

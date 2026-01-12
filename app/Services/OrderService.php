@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\ProductStockUpdated;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
@@ -68,6 +69,8 @@ class OrderService
                 ]);
 
                 $product->decrement('stock', $item->quantity);
+                $product->refresh();
+                ProductStockUpdated::dispatch($product);
             }
 
             $cart->items()->delete();

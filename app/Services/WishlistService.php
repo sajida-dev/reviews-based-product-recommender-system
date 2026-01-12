@@ -26,10 +26,19 @@ class WishlistService
      */
     public function remove(int $userId, int $productId): bool
     {
-        return Wishlist::where('user_id', $userId)
+        $wishlistItem = Wishlist::where('user_id', $userId)
             ->where('product_id', $productId)
-            ->delete() > 0;
+            ->first();
+
+        if ($wishlistItem) {
+            $wishlistItem->delete();
+            return true;
+        }
+
+        return false;
     }
+
+
 
     /**
      * Get all wishlist items for user.

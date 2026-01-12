@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\WishlistRequest;
+use App\Models\Wishlist;
 use App\Services\WishlistService;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -25,11 +26,13 @@ class WishlistController extends Controller
         $userId = $request->user()->id;
         $productId = $request->input('product_id');
 
-        $wishlistItem = $this->service->getAll($userId)
-            ->firstWhere('id', $productId);
+        $wishlistItem = Wishlist::withTrashed()
+            ->where('user_id', $userId)
+            ->where('product_id', $productId)
+            ->first();
 
         try {
-            if ($wishlistItem) {
+            if ($wishlistItem && !$wishlistItem->trashed()) {
                 $this->service->remove($userId, $productId);
                 $added = false;
             } else {

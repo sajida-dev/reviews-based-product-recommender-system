@@ -65,6 +65,11 @@ class Product extends Model
         return $this->hasOne(ProductImage::class)->where('is_primary', true);
     }
 
+
+    public function isLowStock($threshold = 5)
+    {
+        return $this->quantity <= $threshold;
+    }
     /* Scopes */
     public function scopeSearch($q, $term)
     {

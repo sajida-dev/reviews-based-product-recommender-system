@@ -51,6 +51,7 @@
 <script setup>
 import { ref } from "vue";
 import AppLogo from "../AppLogo.vue";
+import { toast } from "vue3-toastify";
 
 const props = defineProps({
     logoText: { type: String, default: "SPARK" },
@@ -105,10 +106,10 @@ const email = ref("");
 
 const handleSubscribe = () => {
     if (!email.value.trim()) {
-        alert("Please enter your email address!");
+        toast.error("Please enter your email address!");
         return;
     }
-    alert(`Subscribed successfully with: ${email.value}`);
+    toast.success(`Subscribed successfully with: ${email.value}`);
     email.value = "";
 };
 </script>

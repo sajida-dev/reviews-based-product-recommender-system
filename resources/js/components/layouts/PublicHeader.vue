@@ -8,7 +8,7 @@ import { useShopStore } from '@/stores/useShopStore'
 import { storeToRefs } from 'pinia'
 import CartWishlistWrapper from '../CartWishlistWrapper.vue'
 import type { ShopState } from '@/stores/useShopStore'
-import { ShoppingBag, ShoppingBasket } from 'lucide-vue-next'
+import { ShoppingBasket } from 'lucide-vue-next'
 
 const shop = useShopStore()
 const { cart, wishlist } = storeToRefs(shop)
@@ -67,7 +67,6 @@ function toggleSubmenu(key: string) {
     if (openSubmenus[key]) {
         openSubmenus[key] = false
     } else {
-        // Optionally close other submenus for accordion effect
         Object.keys(openSubmenus).forEach(k => openSubmenus[k] = false)
         openSubmenus[key] = true
     }
