@@ -4,7 +4,7 @@
         <!-- CART ICON -->
         <button ref="cartButton" @click="toggleCart" aria-label="Toggle Cart"
             class="relative px-2 py-1 rounded-full hover:bg-white/20 transition">
-            <i class="fa-solid fa-cart-shopping text-white text-lg"></i>
+            <ShoppingCartIcon class="w-6 h-6" />
 
             <span v-if="shop.cartCount" class="absolute -top-2 -right-1 bg-primary text-white text-xs
           rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center">
@@ -15,7 +15,7 @@
         <!-- WISHLIST ICON -->
         <button ref="wishlistButton" @click="toggleWishlist" aria-label="Toggle Wishlist"
             class="relative px-2 py-1 rounded-full hover:bg-white/20 transition">
-            <i class="fa-solid fa-heart text-white text-lg"></i>
+            <Heart class="w-6 h-6" />
 
             <span v-if="shop.wishlistCount" class="absolute -top-2 -right-1 bg-primary text-white text-xs
           rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center">
@@ -49,8 +49,8 @@
                             </div>
                         </div>
                         <button @click="removeItem(item)" aria-label="Remove item"
-                            class="text-white hover:text-red-500 transition">
-                            <i class="fa-solid fa-trash"></i>
+                            class="text-red-400 hover:text-red-500 transition">
+                            <TrashIcon class="w-6 h-6" />
                         </button>
                     </div>
                 </div>
@@ -98,86 +98,76 @@
 
     </div>
 </template>
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useShopStore } from '@/stores/useShopStore';
+import { ShoppingCartIcon, Heart, TrashIcon } from 'lucide-vue-next'
 
-<script>
-export default {
-    props: {
-        shop: Object,
-        showCart: Boolean,
-        showWishlist: Boolean,
+// Props for showing popups
+const props = defineProps<{
+    showCart: boolean
+    showWishlist: boolean
+}>()
 
-    },
-    computed: {
-        cartCount() {
-            return this.shop.cart.reduce((sum, item) => sum + item.quantity, 0);
-        },
-        wishlistCount() {
-            return this.shop.wishlist.length;
-        },
-        cartTotal() {
-            return this.shop.cart.reduce((total, item) => total + item.price * item.quantity, 0);
-        }
-    },
-    methods: {
-        toggleCart() {
-            this.$emit('toggle-cart');
-        },
-        toggleWishlist() {
-            this.$emit('toggle-wishlist');
-        },
-        increaseQty(item) {
-            const cartItem = this.shop.cart.find(i => i.id === item.id);
-            if (cartItem) {
-                cartItem.quantity++;
-                this.$emit('update-quantity', item.id, cartItem.quantity);
-            }
-        },
-        decreaseQty(item) {
-            const cartItem = this.shop.cart.find(i => i.id === item.id);
-            if (cartItem && cartItem.quantity > 1) {
-                cartItem.quantity--;
-                this.$emit('update-quantity', item.id, cartItem.quantity);
-            }
-        },
-        removeItem(item) {
-            this.shop.cart = this.shop.cart.filter(i => i.id !== item.id);
-            this.$emit('remove-item', item.id);
-        },
-        goToCheckout() {
-            this.$emit('checkout');
-        },
-        handleClickOutside(event) {
-            const cartPopup = this.$refs.cartPopup;
-            const wishlistPopup = this.$refs.wishlistPopup;
-            const cartButton = this.$refs.cartButton;
-            const wishlistButton = this.$refs.wishlistButton;
+const emit = defineEmits<{
+    (e: 'toggle-cart', value?: boolean): void
+    (e: 'toggle-wishlist', value?: boolean): void
+    (e: 'checkout'): void
+}>()
 
-            if (
-                this.showCart &&
-                cartPopup &&
-                !cartPopup.contains(event.target) &&
-                cartButton &&
-                !cartButton.contains(event.target)
-            ) {
-                this.$emit('toggle-cart', false); // close cart
-            }
+// Use Pinia store
+const shop = useShopStore()
 
-            if (
-                this.showWishlist &&
-                wishlistPopup &&
-                !wishlistPopup.contains(event.target) &&
-                wishlistButton &&
-                !wishlistButton.contains(event.target)
-            ) {
-                this.$emit('toggle-wishlist', false); // close wishlist
-            }
-        }
-    },
-    mounted() {
-        document.addEventListener('click', this.handleClickOutside);
-    },
-    beforeUnmount() {
-        document.removeEventListener('click', this.handleClickOutside);
+// Computed values
+const cartCount = computed(() => shop.cartCount)
+const wishlistCount = computed(() => shop.wishlistCount)
+const cartTotal = computed(() => shop.cartTotal)
+
+// Refs for popup elements
+const cartPopup = ref<HTMLElement | null>(null)
+const wishlistPopup = ref<HTMLElement | null>(null)
+const cartButton = ref<HTMLElement | null>(null)
+const wishlistButton = ref<HTMLElement | null>(null)
+// Methods
+function toggleCart() { emit('toggle-cart') }
+function toggleWishlist() { emit('toggle-wishlist') }
+function goToCheckout() { emit('checkout') }
+
+function handleClickOutside(event: MouseEvent) {
+    if (
+        props.showCart &&
+        cartPopup.value &&
+        !cartPopup.value.contains(event.target as Node) &&
+        cartButton.value &&
+        !cartButton.value.contains(event.target as Node)
+    ) {
+        emit('toggle-cart', false)
     }
+
+    if (
+        props.showWishlist &&
+        wishlistPopup.value &&
+        !wishlistPopup.value.contains(event.target as Node) &&
+        wishlistButton.value &&
+        !wishlistButton.value.contains(event.target as Node)
+    ) {
+        emit('toggle-wishlist', false)
+    }
+}
+
+onMounted(() => document.addEventListener('click', handleClickOutside))
+onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
+
+// Cart item methods
+function increaseQty(item: typeof shop.cart[number]) {
+    shop.updateCartItemQuantity(item.id, item.quantity + 1)
+}
+
+function decreaseQty(item: typeof shop.cart[number]) {
+    if (item.quantity > 1) shop.updateCartItemQuantity(item.id, item.quantity - 1)
+}
+
+function removeItem(item: typeof shop.cart[number]) {
+    shop.removeFromCart(item.id)
 }
 </script>

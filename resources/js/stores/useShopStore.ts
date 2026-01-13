@@ -9,6 +9,7 @@ export interface CartItem {
     productId: number
     name: string
     price: number
+    image: string
     quantity: number
 }
 
@@ -80,6 +81,7 @@ export const useShopStore = defineStore('shop', {
                         id: Date.now() * -1,
                         productId: product.id,
                         name: product.name,
+                        image: product.image || '',
                         price: product.price,
                         quantity: 1,
                     }
