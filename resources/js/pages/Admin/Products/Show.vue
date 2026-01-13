@@ -75,7 +75,7 @@
                         </button>
                     </div>
 
-                    <button :disabled="!product.is_sellable"
+                    <button :disabled="!product.is_sellable || !page.props.auth.user.is_admin"
                         class="flex items-center justify-center gap-3 bg-primary hover:bg-primary-dark disabled:bg-gray-300 text-white font-bold py-4 rounded-lg shadow-lg lg:w-2/3 transition">
                         <ShoppingCartIcon class="w-5 h-5" /> Add to cart
                     </button>
@@ -104,7 +104,6 @@
         <!-- Product Reviews -->
         <section class="mt-16">
             <ProductReviews :productId="product.id" :initialReviews="reviews" />
-            <Reviews />
         </section>
     </AppLayout>
 </template>

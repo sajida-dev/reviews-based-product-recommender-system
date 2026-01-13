@@ -294,7 +294,7 @@ function showProduct(id: number) {
 }
 
 function editProduct(id: number) {
-    router.visit(`/admin/products/${id}/edit`);
+    router.visit(route.get('admin.products.edit', { product: id }));
 }
 
 function askDeleteProduct(id: number) {

@@ -4,7 +4,7 @@
         <h3 class="text-2xl mb-5 font-bold text-white">Customer Reviews</h3>
 
         <!-- Submit Review -->
-        <form @submit.prevent="submit"
+        <form v-if="!page.props.auth.user.is_admin" @submit.prevent="submit"
             class="flex flex-col gap-4 bg-white/20 backdrop-blur-md  border-white/30 shadow-md border rounded-xl p-6">
             <h4 class="font-semibold text-white">Write a Review</h4>
 
@@ -35,7 +35,7 @@
         <!-- Reviews List -->
         <div class="space-y-6">
             <!-- Empty state -->
-            <div v-if="reviews.length === 0" class="text-center text-gray-300 py-10">
+            <div v-if="reviews.length === 0 && !page.props.auth.user.is_admin" class="text-center text-gray-300 py-10">
                 No reviews yet. Be the first to share your thoughts!
             </div>
 
@@ -93,6 +93,7 @@ import { useForm, usePage } from '@inertiajs/vue3'
 interface User {
     name: string
     avatar_url: string
+    is_admin: boolean
 }
 
 interface Review {
@@ -102,7 +103,7 @@ interface Review {
     created_at: string
     user: User
 }
-
+const page = usePage<any>()
 const props = defineProps<{ productId: number; initialReviews: Review[] }>()
 
 const reviews: Ref<Review[]> = ref(props.initialReviews || [])

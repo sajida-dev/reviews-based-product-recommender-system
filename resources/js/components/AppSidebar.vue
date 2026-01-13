@@ -41,16 +41,16 @@ const mainNavItems: NavItem[] = [
         href: "/admin/products",
         icon: Package,
     },
-    {
-        title: "Orders",
-        href: "/admin/orders",
-        icon: ClipboardList,
-    },
-    {
-        title: "Users",
-        href: "/admin/users",
-        icon: Users,
-    },
+    // {
+    //     title: "Orders",
+    //     href: "/admin/orders",
+    //     icon: ClipboardList,
+    // },
+    // {
+    //     title: "Users",
+    //     href: "/admin/users",
+    //     icon: Users,
+    // },
 
 ];
 

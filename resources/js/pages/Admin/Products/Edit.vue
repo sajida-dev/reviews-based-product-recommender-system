@@ -3,7 +3,7 @@
 
         <Head title="Edit Product" />
 
-        <div class="max-w-4xl mx-auto w-full px-4 py-8">
+        <div class="max-w-6xl mx-auto w-full px-4 py-8">
             <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">Edit Product</h1>
 
             <form @submit.prevent="submit"
@@ -117,13 +117,18 @@ import { toast } from 'vue3-toastify';
 interface Category { id: number; name: string; }
 interface Attribute { key: string; value: string; }
 
-const page = usePage<any>();
-const product = page.props.product;
-const categories = computed<Category[]>(() => page.props.categories || []);
+const props = defineProps<{
+    product: any
+    categories: Category[]
+}>()
+console.log('props', props)
+const product = props.product
+console.log('product', product)
+const categories = computed<Category[]>(() => props.categories || []);
 
 const form = useForm({
     name: product.name || '',
-    category_id: product.category_id || '',
+    category_id: Number(product.category_id),
     description: product.description || '',
     price: product.price || '',
     discount_price: product.discount_price || '',
@@ -133,23 +138,19 @@ const form = useForm({
     images: [] as File[],
     primary_image: product.primary_image ?? 0,
 });
+console.log('form', form)
+const attributes = ref<Attribute[]>(
+    product.attributes ? [...product.attributes] : []
+)
 
-// Reactive attributes array
-const attributes = ref<Attribute[]>([...(product.attributes || [])]);
-
-// Common attribute options
 const commonAttributes = ref(['Color', 'Size', 'Material', 'Brand', 'Weight', 'Features']);
 
-// Sizes for size attribute
 const sizes = ref(['XS', 'S', 'M', 'L', 'XL', 'XXL']);
 
-// Add new empty attribute
 function addAttribute() { attributes.value.push({ key: '', value: '' }); }
 
-// Remove attribute at index
 function removeAttribute(index: number) { attributes.value.splice(index, 1); }
 
-// Get hint for attribute key
 function getAttributeHint(key: string) {
     const hints: Record<string, string> = {
         Color: 'Pick a color or type a hex code.',
@@ -174,7 +175,6 @@ function submit() {
     const formData = new FormData();
     formData.append('_method', 'PUT');
 
-    // Merge attributes into form.attributes before sending
     form.attributes = attributes.value;
 
     const data = form.data();

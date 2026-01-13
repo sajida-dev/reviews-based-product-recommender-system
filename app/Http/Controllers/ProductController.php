@@ -94,6 +94,7 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
+        dd($product);
         $this->authorize('update', $product);
 
         return Inertia::render('Admin/Products/Edit', [
