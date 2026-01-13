@@ -196,13 +196,11 @@ function closeModal() {
     form.reset()
 }
 function handleSubmit() {
-    console.log('Submitting form', form)
     loading.value = true
 
     if (isEdit.value && form.id) {
-        form.put(route('categories.update', form.id), {
+        form.put(route('admin.categories.update', form.id), {
             onSuccess: () => {
-                console.log('Updated')
                 toast.success('Category updated')
                 closeModal()
                 router.reload({ only: ['categories'] })
@@ -210,9 +208,8 @@ function handleSubmit() {
             onFinish: () => (loading.value = false),
         })
     } else {
-        form.post(route('categories.store'), {
+        form.post(route('admin.categories.store'), {
             onSuccess: () => {
-                console.log('Created')
                 toast.success('Category created')
                 closeModal()
                 router.reload({ only: ['categories'] })
@@ -230,7 +227,7 @@ function handleDelete(row: Category) {
 function confirmDelete() {
     if (!itemToDelete.value) return
 
-    router.delete(route('categories.destroy', itemToDelete.value.id), {
+    router.delete(route('admin.categories.destroy', itemToDelete.value.id), {
         onSuccess: () => {
             toast.success('Category deleted')
             showDeleteDialog.value = false

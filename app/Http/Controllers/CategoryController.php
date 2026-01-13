@@ -41,7 +41,7 @@ class CategoryController extends Controller
             return back()->withErrors('Unable to create category');
         }
 
-        return redirect()->route('categories.index');
+        return redirect()->route('admin.categories.index');
     }
 
     public function update(Request $request, $id)
@@ -62,12 +62,12 @@ class CategoryController extends Controller
             return back()->withErrors('Unable to update category');
         }
 
-        return redirect()->route('categories.index');
+        return redirect()->route('admin.categories.index');
     }
 
     public function destroy($id)
     {
         if (!$this->service->delete($id)) return back()->withErrors('Unable to delete category');
-        return redirect()->route('categories.index');
+        return redirect()->route('admin.categories.index');
     }
 }

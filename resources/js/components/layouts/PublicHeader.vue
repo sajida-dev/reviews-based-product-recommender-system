@@ -9,6 +9,7 @@ import { storeToRefs } from 'pinia'
 import CartWishlistWrapper from '../CartWishlistWrapper.vue'
 import type { ShopState } from '@/stores/useShopStore'
 import { ShoppingBasket } from 'lucide-vue-next'
+import { computed } from 'vue'
 
 const shop = useShopStore()
 const { cart, wishlist } = storeToRefs(shop)
@@ -23,6 +24,7 @@ defineProps<{
 
 const page = usePage()
 const user = page.props.auth.user
+const canRegister = computed(() => page.props.canRegister)
 
 function toggleCart() {
     showCart.value = !showCart.value
@@ -113,7 +115,7 @@ function toggleSubmenu(key: string) {
 
         <!-- Right: Auth + Cart + Wishlist -->
         <div class="flex items-center gap-3 relative">
-            <Link v-if="user.is_admin" :href="dashboard()" class="rounded-full hidden md:flex bg-primary backdrop-blur-md
+            <Link v-if="user?.is_admin" :href="dashboard()" class="rounded-full hidden md:flex bg-primary backdrop-blur-md
                px-5 py-2 text-sm font-semibold text-white
                hover:bg-white/30 transition">
                 Dashboard

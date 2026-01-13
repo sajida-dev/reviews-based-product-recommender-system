@@ -3,7 +3,7 @@
 
         <Head title="Add Product" />
 
-        <div class="max-w-4xl mx-auto w-full px-4 py-8">
+        <div class="max-w-6xl mx-auto w-full px-4 py-8">
             <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
                 Add New Product
             </h1>

@@ -22,6 +22,7 @@ class ProductImage extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
     protected static function booted()
     {
         static::creating(function ($image) {

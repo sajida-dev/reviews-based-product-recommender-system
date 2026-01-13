@@ -5,6 +5,7 @@ import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import PasswordInput from '@/components/ui/PasswordInput.vue';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/vue3';
@@ -46,12 +47,9 @@ import { LoaderCircle } from 'lucide-vue-next';
                     <InputError :message="errors.email" />
                 </div>
 
-                <div class="grid gap-2">
-                    <Label for="password">Password</Label>
-                    <Input id="password" type="password" required :tabindex="3" autocomplete="new-password"
-                        name="password" placeholder="Password" />
-                    <InputError :message="errors.password" />
-                </div>
+                <PasswordInput id="password" name="password" label="Password" autocomplete="current-password"
+                    placeholder="Password" :tabindex="2" :error="errors.password" />
+
 
                 <div class="grid gap-2">
                     <Label for="password_confirmation">Confirm password</Label>

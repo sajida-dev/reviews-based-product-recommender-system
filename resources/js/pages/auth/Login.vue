@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import PasswordInput from '@/components/ui/PasswordInput.vue';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { register } from '@/routes';
 import { request } from '@/routes/password';
@@ -49,17 +50,8 @@ defineProps<{
                     <InputError :message="errors.email" />
                 </div>
 
-                <div class="grid gap-2">
-                    <div class="flex items-center justify-between">
-                        <Label for="password">Password</Label>
-                        <TextLink v-if="canResetPassword" :href="request()" class="text-sm" :tabindex="5">
-                            Forgot password?
-                        </TextLink>
-                    </div>
-                    <Input id="password" type="password" name="password" required :tabindex="2"
-                        autocomplete="current-password" placeholder="Password" />
-                    <InputError :message="errors.password" />
-                </div>
+                <PasswordInput id="password" name="password" label="Password" autocomplete="current-password"
+                    placeholder="Password" :tabindex="2" :error="errors.password" />
 
                 <div class="flex items-center justify-between">
                     <Label for="remember" class="flex items-center space-x-3">

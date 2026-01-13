@@ -85,10 +85,9 @@ const shop = useShopStore()
 const props = defineProps<{
     product: Product
 }>()
-
-/* =====================
+/* 
    Computed bindings
-===================== */
+ */
 
 const name = computed(() => props.product.name)
 const category = computed(() => props.product.category)
@@ -101,9 +100,9 @@ const discountPercentage = computed(() =>
     Number(props.product.discountPercentage || 0)
 )
 
-/* =====================
+/* 
    Image handling
-===================== */
+ */
 
 const mainImage = ref(
     props.product.mainImage || props.product.images[0] || ''
@@ -116,9 +115,9 @@ watch(
     }
 )
 
-/* =====================
+/* 
    Wishlist
-===================== */
+ */
 
 const liked = ref(props.product.isWishlisted)
 
@@ -131,9 +130,9 @@ watch(liked, () => {
     })
 })
 
-/* =====================
+/* 
    Cart
-===================== */
+ */
 
 function onAddToCart() {
     shop.addToCart({

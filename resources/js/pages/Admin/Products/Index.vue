@@ -246,7 +246,7 @@ const headers = [
     { text: 'Name', value: 'name' },
     { text: 'Category', value: 'category' },
     { text: 'Price', value: 'price' },
-    { text: 'Discount', value: 'discount_price' },
+    { text: 'Discount Price', value: 'discount_price' },
     { text: 'Discount %', value: 'discount_percentage' },
     { text: 'Final Price', value: 'effective_price' },
     { text: 'Stock', value: 'stock' },
