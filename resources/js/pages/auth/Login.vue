@@ -30,6 +30,7 @@ defineProps<{
         </div>
         <SocialLogins />
 
+
         <!-- OR Separator -->
         <div class="relative mb-3">
             <div class="absolute inset-0 flex items-center">

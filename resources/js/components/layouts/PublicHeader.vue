@@ -120,7 +120,7 @@ function toggleSubmenu(key: string) {
                hover:bg-white/30 transition">
                 Dashboard
             </Link>
-            <Link v-else-if="user" :href="logout()" class="rounded-full bg-primary backdrop-blur-md
+            <Link v-if="user" :href="logout()" class="rounded-full bg-primary backdrop-blur-md
                px-5 py-2 text-sm font-semibold text-white
                hover:bg-white/30 transition">
                 Logout

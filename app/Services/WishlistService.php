@@ -3,26 +3,58 @@
 namespace App\Services;
 
 use App\Models\Wishlist;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
+use Illuminate\Support\Facades\Log;
 
 class WishlistService
 {
     /**
      * Add product to wishlist.
+     * Restores soft-deleted item if it already exists.
      */
     public function add(int $userId, int $productId): Wishlist
     {
         return DB::transaction(function () use ($userId, $productId) {
-            return Wishlist::withTrashed()->updateOrCreate(
-                ['user_id' => $userId, 'product_id' => $productId],
-                ['deleted_at' => null]
-            );
+
+            $wishlistItem = Wishlist::withTrashed()
+                ->where('user_id', $userId)
+                ->where('product_id', $productId)
+                ->first();
+
+            Log::info('Wishlist add attempt', [
+                'user_id' => $userId,
+                'product_id' => $productId,
+                'existing_id' => $wishlistItem?->id,
+                'trashed' => $wishlistItem?->trashed(),
+            ]);
+
+            if ($wishlistItem) {
+                if ($wishlistItem->trashed()) {
+                    $wishlistItem->restore();
+
+                    Log::info('Wishlist item restored', [
+                        'wishlist_item_id' => $wishlistItem->id,
+                    ]);
+                }
+
+                return $wishlistItem;
+            }
+
+            Log::info('Creating new wishlist item', [
+                'user_id' => $userId,
+                'product_id' => $productId,
+            ]);
+
+            return Wishlist::create([
+                'user_id' => $userId,
+                'product_id' => $productId,
+            ]);
         });
     }
 
     /**
-     * Remove product from wishlist.
+     * Remove product from wishlist (soft delete).
      */
     public function remove(int $userId, int $productId): bool
     {
@@ -30,32 +62,45 @@ class WishlistService
             ->where('product_id', $productId)
             ->first();
 
-        if ($wishlistItem) {
-            $wishlistItem->delete();
-            return true;
+        Log::info('Wishlist remove attempt', [
+            'user_id' => $userId,
+            'product_id' => $productId,
+            'wishlist_item_id' => $wishlistItem?->id,
+        ]);
+
+        if (! $wishlistItem) {
+            return false;
         }
 
-        return false;
+        $wishlistItem->delete();
+
+        Log::info('Wishlist item removed', [
+            'wishlist_item_id' => $wishlistItem->id,
+        ]);
+
+        return true;
     }
 
-
-
     /**
-     * Get all wishlist items for user.
+     * Get all wishlist items for a user.
      */
-    public function getAll(int $userId)
+    public function getAll(int $userId): Collection
     {
         return Wishlist::with(['product.primaryImage'])
             ->where('user_id', $userId)
             ->get()
+            ->filter(fn($item) => $item->product) // skip deleted products
             ->map(function ($item) {
                 $product = $item->product;
+
                 return [
                     'id' => $item->id,
-                    'name' => $product->name ?? 'Unknown',
-                    'price' => $product->price ?? 0,
+                    'product_id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price,
                     'image' => $product->primaryImage?->url ?? '/images/fallback.png',
                 ];
-            });
+            })
+            ->values();
     }
 }

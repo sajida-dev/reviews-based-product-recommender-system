@@ -39,20 +39,18 @@
                 </div>
 
 
-                <div>
+                <!-- <div>
                     <label class="block text-sm font-semibold mb-2">Product Attributes</label>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div v-for="(attr, index) in attributes" :key="index"
                             class="border rounded-lg p-3 shadow hover:shadow-md transition relative">
 
-                            <!-- Remove button -->
                             <button type="button" @click="removeAttribute(index)"
                                 class="absolute top-1 right-1 text-red-500 hover:text-white bg-white/80 hover:bg-red-500 rounded-full p-1 transition">
                                 <Trash class="w-4 h-4" />
                             </button>
 
-                            <!-- Attribute key with explanation -->
                             <select v-model="attr.key" class="w-full border rounded px-2 py-1 mb-1">
                                 <option disabled value="">Select Attribute</option>
                                 <option v-for="opt in commonAttributes" :key="opt" :value="opt">{{ opt }}</option>
@@ -61,7 +59,6 @@
                                 {{ getAttributeHint(attr.key) }}
                             </p>
 
-                            <!-- Dynamic attribute value input with UX hints -->
                             <div v-if="attr.key === 'Color'">
                                 <input type="color" v-model="attr.value" class="w-full h-10 rounded cursor-pointer" />
                                 <p class="text-xs text-gray-500 mt-1">Pick a color from the palette or type a hex code
@@ -106,12 +103,11 @@
                         </div>
                     </div>
 
-                    <!-- Add attribute button -->
                     <button type="button" @click="addAttribute"
                         class="mt-3 inline-flex items-center gap-1 text-blue-500 hover:text-white hover:bg-blue-500 border border-blue-500 rounded px-3 py-1 transition">
                         <Plus class="w-4 h-4" /> Add Attribute
                     </button>
-                </div>
+                </div> -->
                 <!-- IMAGES -->
                 <div>
                     <FileInput label="Product Images" v-model="form.images" multiple @change="onFileSelect"

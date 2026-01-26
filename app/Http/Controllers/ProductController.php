@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Throwable;
 
@@ -94,7 +95,6 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        dd($product);
         $this->authorize('update', $product);
 
         return Inertia::render('Admin/Products/Edit', [
@@ -106,12 +106,25 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, int $id)
     {
         $this->authorize('update', Product::class);
-
+        Log::info('Product update request', [
+            'user_id' => $request->user()->id,
+            'product_id' => $id,
+            'data' => $request->validated(),
+        ]);
         try {
             $this->service->update($id, $request->validated());
+            Log::info('Product updated successfully', [
+                'user_id' => $request->user()->id,
+                'product_id' => $id,
+            ]);
             return redirect()->route('admin.products.index')
                 ->with('success', 'Product updated successfully');
         } catch (Throwable $e) {
+            Log::error('Failed to update product', [
+                'user_id' => $request->user()->id,
+                'product_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
             report($e);
             return back()->withErrors('Failed to update product');
         }
@@ -119,11 +132,15 @@ class ProductController extends Controller
 
     public function destroy(int $id)
     {
-        $this->authorize('delete', Product::class);
+        $product = Product::findOrFail($id);
+
+        $this->authorize('delete', $product);
 
         try {
             $this->service->delete($id);
-            return redirect()->route('admin.products.index')
+
+            return redirect()
+                ->route('admin.products.index')
                 ->with('success', 'Product deleted');
         } catch (Throwable $e) {
             report($e);

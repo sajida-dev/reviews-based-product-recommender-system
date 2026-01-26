@@ -1,11 +1,11 @@
 <template>
     <section class="py-16 max-w-6xl mx-left mr-auto px-20 space-y-10">
-        <!-- Header -->
         <h3 class="text-2xl mb-5 font-bold text-white">Customer Reviews</h3>
 
         <!-- Submit Review -->
-        <form v-if="!page.props.auth.user.is_admin" @submit.prevent="submit"
-            class="flex flex-col gap-4 bg-white/20 backdrop-blur-md  border-white/30 shadow-md border rounded-xl p-6">
+        <form @submit.prevent="submit"
+            class="flex flex-col gap-4 bg-white/20 backdrop-blur-md border-white/30 shadow-md border rounded-xl p-6">
+
             <h4 class="font-semibold text-white">Write a Review</h4>
 
             <textarea v-model="form.review" placeholder="Share your thoughts about this product..."
@@ -29,17 +29,21 @@
                     {{ form.processing ? 'Submitting...' : 'Submit' }}
                 </button>
             </div>
-        </form>
 
+            <!-- Show moderation message -->
+            <p v-if="moderationMessage" class="text-yellow-300 mt-2">{{ moderationMessage }}</p>
+        </form>
 
         <!-- Reviews List -->
         <div class="space-y-6">
-            <!-- Empty state -->
-            <div v-if="reviews.length === 0 && !page.props.auth.user.is_admin" class="text-center text-gray-300 py-10">
+            <!-- <div v-if="reviews.length === 0 && !page.props.auth.user.is_admin" class="text-center text-gray-300 py-10">
                 No reviews yet. Be the first to share your thoughts!
             </div>
+            <div v-else-if="reviews.length === 0 && page.props.auth.user.is_admin"
+                class="text-center text-gray-300 py-10">
+                No reviews yet.
+            </div> -->
 
-            <!-- Review cards -->
             <transition-group name="fade" tag="div" class="space-y-6">
                 <div v-for="r in reviews" :key="r.id"
                     class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 hover:scale-[1.01] hover:shadow-lg transition-transform duration-200 relative">
@@ -56,9 +60,10 @@
                                         year: 'numeric', month: 'short',
                                         day: 'numeric'
                                     }) }}</span>
+                                    <span v-if="r.spam_flagged" class="text-yellow-300 text-xs ml-2">(Under
+                                        moderation)</span>
                                 </div>
                             </div>
-
                         </div>
 
                         <!-- Star rating -->
@@ -66,13 +71,11 @@
                             <template v-for="i in 5">
                                 <svg v-if="i <= r.rating" xmlns="http://www.w3.org/2000/svg"
                                     class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.955a1 1 0 0 0 .95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 0 0-.364 1.118l1.287 3.955c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 0 0-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.955a1 1 0 0 0-.364-1.118L2.064 9.382c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 0 0 .95-.69l1.286-3.955z" />
+                                    <path d="M9.049 2.927c..." />
                                 </svg>
                                 <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500"
                                     fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.955a1 1 0 0 0 .95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 0 0-.364 1.118l1.287 3.955c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 0 0-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.955a1 1 0 0 0-.364-1.118L2.064 9.382c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 0 0 .95-.69l1.286-3.955z" />
+                                    <path d="M9.049 2.927c..." />
                                 </svg>
                             </template>
                         </div>
@@ -82,7 +85,6 @@
                 </div>
             </transition-group>
         </div>
-
     </section>
 </template>
 
@@ -102,11 +104,14 @@ interface Review {
     rating: number
     created_at: string
     user: User
+    spam_flagged?: boolean
 }
+
 const page = usePage<any>()
 const props = defineProps<{ productId: number; initialReviews: Review[] }>()
 
 const reviews: Ref<Review[]> = ref(props.initialReviews || [])
+const moderationMessage = ref('')
 
 const form = useForm({
     review: '',
@@ -116,6 +121,7 @@ const form = useForm({
 
 const submit = () => {
     const scrollPos = window.scrollY
+    moderationMessage.value = ''
 
     form.post('/reviews', {
         preserveState: true,
@@ -123,9 +129,13 @@ const submit = () => {
         onSuccess: (page) => {
             const { props: pageProps } = usePage()
             const newReview = pageProps.newReview as Review | undefined
-            console.log('newReview', newReview)
-            if (newReview) reviews.value.unshift(newReview)
-
+            if (newReview) {
+                if (newReview.spam_flagged) {
+                    moderationMessage.value = 'Your review has been submitted for moderation.'
+                } else {
+                    reviews.value.unshift(newReview)
+                }
+            }
             form.reset('review', 'rating')
         },
         onError: () => console.log('Validation failed'),
@@ -133,25 +143,3 @@ const submit = () => {
     })
 }
 </script>
-
-
-<style>
-.bg-primary {
-    background-color: #4f46e5;
-}
-
-.bg-primary-dark {
-    background-color: #4338ca;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: all 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-    transform: translateY(-10px);
-}
-</style>

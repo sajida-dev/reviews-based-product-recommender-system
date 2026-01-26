@@ -91,9 +91,9 @@
                     <button class="text-green-500 p-1" @click="showProduct(row.id)" title="View">
                         <Icon name="eye" />
                     </button>
-                    <button class="text-blue-500 p-1" @click="editProduct(row.id)" title="Edit">
+                    <!-- <button class="text-blue-500 p-1" @click="editProduct(row.id)" title="Edit">
                         <Icon name="edit" />
-                    </button>
+                    </button> -->
 
                     <button class="text-red-500 p-1" @click="askDeleteProduct(row.id)" title="Delete">
                         <Icon name="trash" />

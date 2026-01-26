@@ -14,9 +14,16 @@ class ReviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => ['required', 'integer', 'exists:products,id'],
-            'rating'     => ['required', 'integer', 'between:1,5'],
-            'review'     => ['nullable', 'string', 'max:2000'],
+            'product_id' => ['required', 'exists:products,id'],
+            'rating' => ['required', 'integer', 'between:1,5'],
+            'review' => [
+                'nullable',
+                'string',
+                'min:5',
+                'max:2000',
+                'not_regex:/https?:\/\//i',   // block URLs
+                'not_regex:/<[^>]*>/'         // block HTML
+            ],
         ];
     }
 
