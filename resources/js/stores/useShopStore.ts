@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
-import { router } from '@inertiajs/vue3'
+import { router, usePage } from '@inertiajs/vue3'
 import { toast } from 'vue3-toastify'
 
 /* ------------------ TYPES ------------------ */
-
+// Defining these here to fix the "@import '@/product'" error
 export interface CartItem {
     id: number
     productId: number
@@ -25,27 +25,6 @@ export interface ShopState {
     wishlist: Product[]
 }
 
-/* ------------------ HELPER ------------------ */
-/**
- * Generic optimistic UI handler
- */
-function optimisticRequest<T>({
-    optimisticUpdate,
-    rollback,
-    request,
-}: {
-    optimisticUpdate: () => T
-    rollback: (backup: T) => void
-    request: (onError: () => void) => void
-}) {
-    const backup = optimisticUpdate()
-
-    request(() => {
-        rollback(backup)
-    })
-}
-
-
 /* ------------------ STORE ------------------ */
 
 export const useShopStore = defineStore('shop', {
@@ -55,178 +34,152 @@ export const useShopStore = defineStore('shop', {
     }),
 
     getters: {
-        cartCount: (state) =>
-            state.cart.reduce((sum, item) => sum + item.quantity, 0),
+        cartCount: (state: ShopState): number =>
+            state.cart.reduce((sum: number, item: CartItem) => sum + item.quantity, 0),
 
-        cartTotal: (state) =>
-            state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        cartTotal: (state: ShopState): number =>
+            state.cart.reduce((sum: number, item: CartItem) => sum + item.price * item.quantity, 0),
 
-        wishlistCount: (state) => state.wishlist.length,
+        wishlistCount: (state: ShopState): number => state.wishlist.length,
     },
 
     actions: {
-        /* ------------------ CART ------------------ */
-
-        addToCart(product: Product) {
-            optimisticRequest({
-                optimisticUpdate: () => {
-                    let existing = this.cart.find(i => i.productId === product.id)
-
-                    if (existing) {
-                        existing.quantity++
-                        return existing
-                    }
-
-                    const tempItem: CartItem = {
-                        id: Date.now() * -1,
-                        productId: product.id,
-                        name: product.name,
-                        image: product.image || '',
-                        price: product.price,
-                        quantity: 1,
-                    }
-
-                    this.cart.push(tempItem)
-                    return tempItem
-                },
-
-                rollback: (item) => {
-                    if (item.quantity > 1) item.quantity--
-                    else this.cart = this.cart.filter(i => i.id !== item.id)
-
-                    toast.error('Product could not be added to cart')
-                },
-
-                request: (onError) => {
-                    router.post(
-                        route('cart.store'),
-                        { product_id: product.id, quantity: 1 },
-                        {
-                            preserveState: true,
-                            preserveScroll: true,
-                            onSuccess: (page) => {
-                                const serverItem = (page.props as any).shop.cart
-                                    .find((i: any) => i.productId === product.id)
-
-                                if (serverItem) {
-                                    const local = this.cart.find(
-                                        i => i.productId === product.id
-                                    )
-                                    if (local) {
-                                        local.id = serverItem.id
-                                        local.quantity = serverItem.quantity
-                                    }
-                                }
-                                toast.success('Product added')
-                            },
-                            onError,
-                        }
-                    )
-                },
-            })
+        checkAuth(): boolean {
+            const page = usePage();
+            if (!(page.props.auth as any).user) {
+                toast.error('Please login to continue');
+                return false;
+            }
+            return true;
         },
 
+        /* ------------------ CART ------------------ */
 
-        removeFromCart(itemId: number) {
-            optimisticRequest({
-                optimisticUpdate: () => {
-                    const backup = [...this.cart]
-                    this.cart = this.cart.filter(i => i.id !== itemId)
-                    return backup
-                },
+        async addToCart(product: Product) {
+            if (!this.checkAuth()) return;
 
-                rollback: (backup) => {
+            let existing = this.cart.find((i: CartItem) => i.productId === product.id)
+
+            if (existing) {
+                existing.quantity++
+            } else {
+                existing = {
+                    id: Date.now() * -1,
+                    productId: product.id,
+                    name: product.name,
+                    image: product.image || '',
+                    price: product.price,
+                    quantity: 1,
+                }
+                this.cart.push(existing)
+            }
+
+            router.post(
+                route('cart.store'),
+                { product_id: product.id, quantity: 1 },
+                {
+                    preserveState: true,
+                    onSuccess: (page) => {
+                        const shopCart = (page.props as any).shop.cart as any[]
+                        const backendItem = shopCart.find((i: any) => i.productId === product.id)
+                        
+                        if (backendItem?.id && existing) {
+                            existing.id = backendItem.id
+                        }
+                        toast.success('Product added to cart')
+                    },
+                    onError: (errors: any) => {
+                        if (existing!.quantity > 1) {
+                            existing!.quantity--
+                        } else {
+                            this.cart = this.cart.filter((i: CartItem) => i.id !== existing!.id)
+                        }
+                        const msg = Object.values(errors)[0] as string;
+                        toast.error(msg || 'Could not add to cart');
+                    },
+                }
+            )
+        },
+
+        async removeFromCart(itemId: number) {
+            if (!this.checkAuth()) return;
+
+            const backup = [...this.cart]
+            this.cart = this.cart.filter((i: CartItem) => i.id !== itemId)
+
+            router.delete(route('cart.destroy', itemId), {
+                preserveState: true,
+                onSuccess: () => toast.success('Product removed'),
+                onError: () => {
                     this.cart = backup
                     toast.error('Remove failed')
                 },
-
-                request: (onError) => {
-                    router.delete(route('cart.destroy', itemId), {
-                        preserveState: true,
-                        preserveScroll: true,
-                        onSuccess: () => toast.success('Removed'),
-                        onError,
-                    })
-                },
             })
         },
 
-        updateCartItemQuantity(itemId: number, quantity: number) {
-            const item = this.cart.find(i => i.id === itemId)
+        async updateCartItemQuantity(itemId: number, quantity: number) {
+            if (!this.checkAuth()) return;
+
+            const item = this.cart.find((i: CartItem) => i.id === itemId)
             if (!item) return
 
             if (quantity < 1) {
-                this.removeFromCart(itemId)
+                await this.removeFromCart(itemId)
                 return
             }
 
-            optimisticRequest({
-                optimisticUpdate: () => {
-                    const oldQty = item.quantity
-                    item.quantity = quantity
-                    return oldQty
-                },
+            const oldQty = item.quantity
+            item.quantity = quantity
 
-                rollback: (oldQty) => {
-                    item.quantity = oldQty
-                    toast.error('Update failed')
-                },
+            router.put(
+                route('cart.updateQty', { itemId }),
+                { quantity },
+                {
+                    preserveState: true,
+                    onSuccess: () => toast.success('Quantity updated'),
+                    onError: (errors: any) => {
+                        item.quantity = oldQty
+                        const msg = Object.values(errors)[0] as string;
+                        toast.error(msg || 'Update failed');
+                    },
+                }
+            )
+        },
 
-                request: (onError) => {
-                    router.put(
-                        route('cart.updateQty', { itemId }),
-                        { quantity },
-                        {
-                            preserveState: true,
-                            preserveScroll: true,
-                            onSuccess: () => toast.success('Quantity updated'),
-                            onError,
-                        }
-                    )
-                },
-            })
+        /* ------------------ WISHLIST ------------------ */
+
+        async toggleWishlist(product: Product) {
+            if (!this.checkAuth()) return;
+
+            const exists = this.wishlist.some((i: Product) => i.id === product.id)
+            const backup = [...this.wishlist]
+
+            if (exists) {
+                this.wishlist = this.wishlist.filter((i: Product) => i.id !== product.id)
+            } else {
+                this.wishlist.push(product)
+            }
+
+            router.post(
+                route('wishlist.toggle'),
+                { product_id: product.id },
+                {
+                    preserveState: true,
+                    onSuccess: () => toast.success('Wishlist updated'),
+                    onError: () => {
+                        this.wishlist = backup
+                        toast.error('Wishlist update failed')
+                    },
+                }
+            )
         },
 
         setCartFromServer(cartItems: CartItem[]) {
             this.cart = cartItems
         },
 
-        /* ------------------ WISHLIST ------------------ */
-
-        toggleWishlist(product: Product) {
-            optimisticRequest({
-                optimisticUpdate: () => {
-                    const exists = this.wishlist.some(i => i.id === product.id)
-
-                    if (exists) {
-                        this.wishlist = this.wishlist.filter(i => i.id !== product.id)
-                    } else {
-                        this.wishlist.push(product)
-                    }
-
-                    return exists
-                },
-
-                rollback: (wasExists) => {
-                    if (wasExists) this.wishlist.push(product)
-                    else this.wishlist = this.wishlist.filter(i => i.id !== product.id)
-
-                    toast.error('Wishlist update failed')
-                },
-
-                request: (onError) => {
-                    router.post(
-                        route('wishlist.toggle'),
-                        { product_id: product.id },
-                        {
-                            preserveState: true,
-                            preserveScroll: true,
-                            onSuccess: () => toast.success('Wishlist updated'),
-                            onError,
-                        }
-                    )
-                },
-            })
-        },
+        setWishlistFromServer(products: Product[]) {
+            this.wishlist = products
+        }
     },
 })

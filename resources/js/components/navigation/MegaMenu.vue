@@ -85,7 +85,7 @@ const popular = computed<MenuCategory[]>(() =>
                             class="block text-sm text-gray-300 hover:text-white">
                             {{ c.name }}
                         </Link>
-                        <Link href="/shop?sort=new" class="mt-4 inline-block text-xs text-primary">
+                        <Link href="/products?sort=new" class="mt-4 inline-block text-xs text-primary">
                             View all →
                         </Link>
                     </div>
@@ -99,7 +99,7 @@ const popular = computed<MenuCategory[]>(() =>
                             class="block text-sm text-gray-300 hover:text-white">
                             {{ c.name }}
                         </Link>
-                        <Link href="/shop?sort=trending" class="mt-4 inline-block text-xs text-primary">
+                        <Link href="/products?sort=trending" class="mt-4 inline-block text-xs text-primary">
                             View all →
                         </Link>
                     </div>
@@ -113,7 +113,7 @@ const popular = computed<MenuCategory[]>(() =>
                             class="block text-sm text-gray-300 hover:text-white">
                             {{ c.name }}
                         </Link>
-                        <Link href="/shop?sort=popular" class="mt-4 inline-block text-xs text-primary">
+                        <Link href="/products?sort=popular" class="mt-4 inline-block text-xs text-primary">
                             View all →
                         </Link>
                     </div>

@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import {
     LayoutGrid,
     Folder,
@@ -24,23 +24,28 @@ import {
     Heart,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-
+import { computed } from 'vue';
+const page = usePage();
+const user = computed(() => page.props.auth.user);
 const mainNavItems: NavItem[] = [
     {
         title: "Dashboard",
         href: dashboard(),
         icon: LayoutGrid,
     },
-    {
+    ...(user.value?.is_admin ?[
+         {
         title: "Categories",
         href: "/admin/categories",
         icon: Folder,
     },
-    {
+    {   
         title: "Products",
         href: "/admin/products",
         icon: Package,
-    },
+    }
+    ] : [])
+   ,
     // {
     //     title: "Orders",
     //     href: "/admin/orders",

@@ -11,7 +11,7 @@
         <button class="absolute top-3 right-3 z-10 text-orange-400 transition hover:scale-110 hover:text-orange-500"
             aria-label="Toggle wishlist" @click="$emit('toggle-wishlist', product)">
             ❤
-        </button>
+    </button>
 
         <!-- Product Image -->
         <div class="relative h-64 w-full overflow-hidden">

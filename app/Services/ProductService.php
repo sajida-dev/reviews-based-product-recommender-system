@@ -20,20 +20,43 @@ class ProductService
     public function publicList(array $filters = [], ?int $userId = null)
     {
         $wishlistProductIds = collect();
-
         if ($userId) {
             $wishlistProductIds = Wishlist::where('user_id', $userId)
                 ->pluck('product_id');
         }
 
-        return Product::query()
+        $query = Product::query()
             ->where('is_active', true)
-            ->with(['category:id,name', 'images'])
-            ->when($filters['search'] ?? null, fn($q, $v) => $q->where('name', 'like', "%{$v}%"))
-            ->when($filters['category_id'] ?? null, fn($q, $v) => $q->where('category_id', $v))
-            ->latest()
+            ->with(['category:id,name', 'images']);
+
+        $query->when($filters['search'] ?? null, fn($q, $v) => 
+            $q->where('name', 'like', "%{$v}%")
+        );
+        
+        $query->when($filters['category_id'] ?? null, fn($q, $v) => 
+            $q->where('category_id', $v)
+        );
+
+        $sort = $filters['sort'] ?? 'new'; 
+
+        match ($sort) {
+            'popular' => $query->withCount('orders')
+                            ->orderBy('orders_count', 'desc'),
+            
+            'trending' => $query->orderBy('views', 'desc'),
+            
+            'price_low' => $query->orderBy('price', 'asc'),
+            'price_high' => $query->orderBy('price', 'desc'),
+
+            default => $query->latest() 
+        };
+
+        return $query
             ->paginate(12)
-            ->through(fn(Product $product) => $this->transformForPublic($product, $wishlistProductIds));
+            ->withQueryString() 
+            ->through(fn(Product $product) => 
+                $this->transformForPublic($product, $wishlistProductIds)
+            );
     }
 
     /** Admin listing */

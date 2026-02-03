@@ -11,6 +11,7 @@ use Laravel\Fortify\Features;
 use App\Http\Controllers\Settings\SocialLoginController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Middleware\ForceTwoFactorSetup;
+use App\Http\Middleware\AdminMiddleware;
 use App\Services\ProductService;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,6 +27,18 @@ Route::get('/', function (ProductService $productService) {
         'adProducts' => $productService->getHomeAdProducts(2),
     ]);
 })->name('home');
+
+Route::get('/features', function () {
+        return Inertia::render('Feature');
+    })->name('feature');
+
+Route::get('/about',function () {
+        return Inertia::render('About');
+    })->name('about');
+
+    Route::get('/contact',function () {
+        return Inertia::render('Contact');
+    })->name('contact');
 
 // Public product listing
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -57,7 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Checkout & Orders
     Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
-
+    
     // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
@@ -67,7 +80,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 
-Route::middleware(['auth', 'verified', ForceTwoFactorSetup::class])->group(function () {
+Route::middleware(['auth', 'verified', ForceTwoFactorSetup::class, AdminMiddleware::class])->group(function () {
 
     // Admin product listing (dashboard)
     Route::get('/admin/products', [ProductController::class, 'adminIndex'])->name('admin.products.index');

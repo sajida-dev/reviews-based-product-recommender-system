@@ -23,7 +23,8 @@ class Product extends Model
         'discount_price',
         'stock',
         'is_active',
-        'attributes'
+        'attributes',
+        'views'
     ];
 
     protected $casts = [
@@ -45,6 +46,10 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+    public function orders()
+    {
+        return $this->hasMany(OrderItem::class); 
     }
 
     public function images(): HasMany

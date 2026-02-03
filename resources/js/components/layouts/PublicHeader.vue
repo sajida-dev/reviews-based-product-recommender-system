@@ -132,7 +132,7 @@ function toggleSubmenu(key: string) {
                     Log in
                 </Link>
 
-                <Link v-if="canRegister" :href="register()" class="rounded-full border border-white/40
+                <Link  :href="register()" class="rounded-full border border-white/40
                  px-5 py-2 text-sm font-semibold text-white
                  hover:bg-white/20 transition">
                     Register
