@@ -21,7 +21,6 @@ const onSubmit = (event: Event) => {
           Any questions or remarks? Just write us a message!
         </p>
 
-        <!-- Inputs -->
         <form @submit="onSubmit" class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="text-left">
