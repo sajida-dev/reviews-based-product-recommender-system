@@ -27,6 +27,7 @@ import AppLogo from './AppLogo.vue';
 import { computed } from 'vue';
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+
 const mainNavItems: NavItem[] = [
     {
         title: "Dashboard",
