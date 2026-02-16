@@ -2,7 +2,7 @@
 import { ref, onMounted, reactive } from 'vue'
 import AppLogo from '@/components/AppLogo.vue'
 import { dashboard, login, logout, register } from '@/routes'
-import { Link, usePage } from '@inertiajs/vue3'
+import { Link, usePage, router } from '@inertiajs/vue3'
 import MegaMenu from '../navigation/MegaMenu.vue'
 import { useShopStore } from '@/stores/useShopStore'
 import { storeToRefs } from 'pinia'
@@ -45,7 +45,8 @@ function removeItemHandler(itemId: number) {
 }
 
 function goToCheckoutHandler() {
-    window.location.href = '/checkout'
+    if (shop.cartCount === 0) return
+    router.get(route('checkout'))
 }
 
 function toggleMobileMenu() {

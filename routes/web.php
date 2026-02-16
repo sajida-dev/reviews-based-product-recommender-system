@@ -68,7 +68,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     // Checkout & Orders
-    Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+    Route::get('/checkout', [OrderController::class, 'showCheckout'])->name('checkout');
+    Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout.submit');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     
     // Wishlist

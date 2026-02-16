@@ -15,6 +15,20 @@ class OrderController extends Controller
 
     ) {}
 
+    public function showCheckout(\Illuminate\Http\Request $request)
+    {
+        $user = $request->user();
+        $cart = $user->cart()->with('items.product.primaryImage')->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        }
+
+        return Inertia::render('Checkout/Index', [
+            'user' => $user->only(['name', 'email']),
+        ]);
+    }
+
     public function checkout(CheckoutRequest $request)
     {
         try {
