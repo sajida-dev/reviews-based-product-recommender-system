@@ -36,14 +36,14 @@ class CartService
             Log::info("Attempting to add product to cart", [
                 'user_id'          => $userId,
                 'product_id'       => $productId,
-                'product_stock'    => $product->stock_quantity,
+                'product_stock'    => $product->stock,
                 'requested_qty'    => $quantity,
             ]);
 
             if ($product->stock < $quantity) {
                 Log::warning("Insufficient stock for product", [
                     'product_id' => $productId,
-                    'stock'      => $product->stock_quantity,
+                    'stock'      => $product->stock,
                     'requested'  => $quantity,
                 ]);
                 throw new RuntimeException("Insufficient stock for {$product->name}");
@@ -107,14 +107,14 @@ class CartService
                 'product_id'    => $product->id,
                 'old_quantity'  => $item->quantity,
                 'new_quantity'  => $quantity,
-                'stock_available' => $product->stock_quantity,
+                'stock_available' => $product->stock,
             ]);
 
             // Stock validation
-            if ($product->stock_quantity < $quantity) {
+            if ($product->stock < $quantity) {
                 Log::warning("Insufficient stock to update quantity", [
                     'product_id' => $product->id,
-                    'stock'      => $product->stock_quantity,
+                    'stock'      => $product->stock,
                     'requested'  => $quantity,
                 ]);
                 throw new RuntimeException("Insufficient stock for {$product->name}");

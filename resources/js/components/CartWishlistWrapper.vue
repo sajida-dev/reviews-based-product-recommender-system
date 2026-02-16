@@ -88,8 +88,9 @@
                 </div>
 
                 <div class="p-4 border-t border-neutral-700">
-                    <button
-                        class="w-full border border-neutral-600 text-white py-2 rounded-lg hover:bg-white/10 transition">
+                    <button @click="viewWishlist"
+                        class="w-full border border-neutral-600 text-white py-2 rounded-lg hover:bg-white/10 transition"
+                        :disabled="shop.wishlistCount === 0">
                         View Wishlist
                     </button>
                 </div>
@@ -102,6 +103,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useShopStore } from '@/stores/useShopStore';
 import { ShoppingCartIcon, Heart, TrashIcon } from 'lucide-vue-next'
+import { router } from '@inertiajs/vue3'
 
 // Props for showing popups
 const props = defineProps<{
@@ -131,7 +133,17 @@ const wishlistButton = ref<HTMLElement | null>(null)
 // Methods
 function toggleCart() { emit('toggle-cart') }
 function toggleWishlist() { emit('toggle-wishlist') }
-function goToCheckout() { emit('checkout') }
+function goToCheckout() {
+    console.log("inside go to checkout fun")
+    if (shop.cartCount === 0) return
+    router.get(route('checkout'))
+}
+
+function viewWishlist() {
+    if (shop.wishlistCount === 0) return
+    // Redirect to wishlist page
+    router.get(route('wishlist.index'))
+}
 
 function handleClickOutside(event: MouseEvent) {
     if (
