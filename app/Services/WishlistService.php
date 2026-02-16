@@ -86,10 +86,10 @@ class WishlistService
      */
     public function getAll(int $userId): Collection
     {
-        return Wishlist::with(['product.primaryImage'])
+        return Wishlist::with(['product.primaryImage', 'product.category'])
             ->where('user_id', $userId)
             ->get()
-            ->filter(fn($item) => $item->product) // skip deleted products
+            ->filter(fn($item) => $item->product) 
             ->map(function ($item) {
                 $product = $item->product;
 
@@ -97,8 +97,16 @@ class WishlistService
                     'id' => $item->id,
                     'product_id' => $product->id,
                     'name' => $product->name,
-                    'price' => $product->price,
+                    'slug' => $product->slug,
+                    'price' => (float) $product->price,
+                    'discount_price' => $product->discount_price ? (float) $product->discount_price : null,
+                    'effective_price' => (float) $product->effective_price,
+                    'discount_percentage' => $product->discount_percentage ?? 0,
+                    'stock' => $product->stock,
+                    'is_in_stock' => $product->is_in_stock,
+                    'is_sellable' => $product->is_sellable,
                     'image' => $product->primaryImage?->url ?? '/images/fallback.png',
+                    'category' => $product->category?->name ?? '',
                 ];
             })
             ->values();
