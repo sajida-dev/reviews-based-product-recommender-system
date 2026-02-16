@@ -70,6 +70,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
     *,
     ::after,
     ::before,
@@ -80,6 +81,7 @@
 }
 
 @layer utilities {
+
     body,
     html {
         --font-sans:
@@ -121,20 +123,24 @@
     --chart-4: hsl(43 74% 66%);
     --chart-5: hsl(27 87% 67%);
     --radius: 0.5rem;
-    --sidebar-background: hsl(0, 0%, 8%); /* very light bluish */
-    --sidebar-foreground: hsl(0, 0%, 100%); /* text dark navy */
-    --sidebar-primary: hsla(265, 85%, 60%, 0); /* neon purple highlight */
+    --sidebar-background: hsl(0, 0%, 8%);
+    /* very light bluish */
+    --sidebar-foreground: hsl(0, 0%, 100%);
+    /* text dark navy */
+    --sidebar-primary: hsla(265, 85%, 60%, 0);
+    /* neon purple highlight */
     --sidebar-primary-foreground: hsl(0 0% 100%);
 
-    --sidebar-accent: hsl(
-        0,
-        0%,
-        27%
-    ); /* soft electric blue background for hover */
+    --sidebar-accent: hsl(0,
+            0%,
+            27%);
+    /* soft electric blue background for hover */
     --sidebar-accent-foreground: hsl(0, 0%, 100%);
 
-    --sidebar-border: hsl(205, 69%, 18%); /* subtle borders */
-    --sidebar-ring: hsl(265 85% 60%); /* glowing ring for active item */
+    --sidebar-border: hsl(205, 69%, 18%);
+    /* subtle borders */
+    --sidebar-ring: hsl(265 85% 60%);
+    /* glowing ring for active item */
     --sidebar: hsl(205, 69%, 18%);
 }
 
@@ -145,7 +151,7 @@
     --card-foreground: hsl(0 0% 98%);
     --popover: hsl(0 0% 3.9%);
     --popover-foreground: hsl(0 0% 98%);
-    --primary: hsl(0 0% 98%);
+    --primary: hsl(202, 98%, 34%);
     --primary-foreground: hsl(0 0% 9%);
     --secondary: hsl(0 0% 14.9%);
     --secondary-foreground: hsl(0 0% 98%);
@@ -163,14 +169,14 @@
     --chart-3: hsl(30 80% 55%);
     --chart-4: hsl(280 65% 60%);
     --chart-5: hsl(340 75% 55%);
-    --sidebar-background: hsl(280, 36%, 13%);
+    --sidebar-background: hsl(0, 0%, 8%);
     --sidebar-foreground: hsl(0 0% 95.9%);
-    --sidebar-primary: hsl(205, 69%, 18%);
+    --sidebar-primary: hsla(265, 85%, 60%, 0);
     --sidebar-primary-foreground: hsl(0 0% 100%);
     --sidebar-accent: hsla(205, 66%, 30%, 0.851);
     --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-    --sidebar-border: hsl(0 0% 15.9%);
-    --sidebar-ring: hsl(205, 69%, 18%);
+    --sidebar-border: hsl(205, 69%, 18%);
+    --sidebar-ring: hsl(265 85% 60%);
     --sidebar: hsl(205, 69%, 18%);
 }
 
@@ -178,6 +184,7 @@
     * {
         @apply border-border outline-ring/50;
     }
+
     body {
         @apply bg-background text-foreground;
     }

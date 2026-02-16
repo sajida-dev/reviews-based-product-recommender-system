@@ -2,6 +2,7 @@
 import RegisteredUserController from '@/actions/Laravel/Fortify/Http/Controllers/RegisteredUserController';
 import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
+import SocialLogins from '@/components/SocialLogins.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

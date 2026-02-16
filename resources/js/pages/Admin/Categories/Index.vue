@@ -10,8 +10,7 @@
             </div>
 
             <!-- Table -->
-            <BaseDataTable :headers="headers" :items="categories" :loading="loading"
-                class="bg-white rounded-xl shadow border">
+            <BaseDataTable :headers="headers" :items="categories" :loading="loading">
                 <template #["item-parent"]="row">
                     {{ row.parent?.name ?? '—' }}
                 </template>
