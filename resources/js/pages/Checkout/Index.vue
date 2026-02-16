@@ -1,5 +1,6 @@
 <template>
-    <PublicLayout>
+    <PublicLayout hero-title="Discover Your Next Adventure" url="'/bg/product.jpeg'"
+        hero-subtitle="Browse our wide range of products and find something you love.">
         <div class="min-h-screen bg-neutral-900 py-12 px-4 md:px-6">
             <div class="max-w-6xl mx-auto">
                 <!-- Breadcrumbs -->
