@@ -70,6 +70,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Checkout & Orders
     Route::get('/checkout', [OrderController::class, 'showCheckout'])->name('checkout');
     Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout.submit');
+    
+    // Payment
+    Route::get('/payment/{orderId}', [OrderController::class, 'showPayment'])->name('payment.show');
+    Route::post('/payment', [OrderController::class, 'processPayment'])->name('payment.process');
+    Route::get('/payment/{orderId}/success', [OrderController::class, 'paymentSuccess'])->name('payment.success');
+    
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     
     // Wishlist

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CheckoutRequest;
+use App\Http\Requests\PaymentRequest;
 use App\Models\Order;
 use App\Services\OrderService;
 use Inertia\Inertia;
@@ -41,13 +42,67 @@ class OrderController extends Controller
                 ]
             );
 
+            // Redirect to payment page instead of order confirmation
             return redirect()
-                ->route('orders.show', $order->id)
-                ->with('success', 'Order placed successfully');
+                ->route('payment.show', $order->id)
+                ->with('success', 'Please complete payment to confirm your order.');
         } catch (Throwable $e) {
             report($e);
             return back()->withErrors($e->getMessage());
         }
+    }
+
+    public function showPayment(\Illuminate\Http\Request $request, int $orderId)
+    {
+        $user = $request->user();
+        $order = Order::with('items.product.primaryImage')
+            ->where('user_id', $user->id)
+            ->where('id', $orderId)
+            ->firstOrFail();
+
+        // Don't allow payment if already paid
+        if ($order->payment_status === 'completed') {
+            return redirect()
+                ->route('orders.show', $order->id)
+                ->with('info', 'This order has already been paid.');
+        }
+
+        return Inertia::render('Payment/Index', [
+            'order' => $order,
+        ]);
+    }
+
+    public function processPayment(PaymentRequest $request)
+    {
+        try {
+            $user = $request->user();
+            $order = $this->service->processPayment(
+                $user->id,
+                $request->order_id,
+                $request->payment_method,
+                $request->only(['card_number', 'card_holder_name', 'expiry_month', 'expiry_year', 'cvv'])
+            );
+
+            return redirect()
+                ->route('payment.success', $order->id)
+                ->with('success', 'Payment processed successfully!');
+        } catch (Throwable $e) {
+            report($e);
+            return back()->withErrors($e->getMessage());
+        }
+    }
+
+    public function paymentSuccess(\Illuminate\Http\Request $request, int $orderId)
+    {
+        $user = $request->user();
+        $order = Order::with('items.product')
+            ->where('user_id', $user->id)
+            ->where('id', $orderId)
+            ->firstOrFail();
+
+        return Inertia::render('Payment/Success', [
+            'order' => $order,
+        ]);
     }
 
     public function show(int $id)

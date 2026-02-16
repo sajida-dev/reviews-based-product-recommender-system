@@ -330,9 +330,7 @@ function onSubmit() {
         billing_address: buildAddressString(),
     })).post(route('checkout.submit'), {
         preserveScroll: true,
-        onSuccess: () => {
-            shop.setCartFromServer([])
-        },
+        
     })
 }
 

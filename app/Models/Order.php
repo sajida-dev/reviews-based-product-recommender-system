@@ -19,6 +19,10 @@ class Order extends Model
         'status',
         'shipping_address',
         'billing_address',
+        'payment_method',
+        'payment_status',
+        'payment_transaction_id',
+        'paid_at',
     ];
 
     protected $casts = [
@@ -26,6 +30,7 @@ class Order extends Model
         'discount' => 'decimal:2',
         'tax'      => 'decimal:2',
         'total'    => 'decimal:2',
+        'paid_at'  => 'datetime',
     ];
 
     /* Relationships */
