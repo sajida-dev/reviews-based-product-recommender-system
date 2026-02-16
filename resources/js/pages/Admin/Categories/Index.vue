@@ -3,15 +3,14 @@
 
         <Head title="Categories" />
 
-        <div class="max-w-6xl mx-auto w-full py-8">
+        <div class="max-w-5xl mx-auto w-full py-8">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-bold">Categories</h1>
                 <Button @click="openCreateModal">Add Category</Button>
             </div>
 
             <!-- Table -->
-            <BaseDataTable :headers="headers" :items="categories" :loading="loading"
-                class="bg-white rounded-xl shadow border">
+            <BaseDataTable :headers="headers" :items="categories" :loading="loading">
                 <template #["item-parent"]="row">
                     {{ row.parent?.name ?? '—' }}
                 </template>

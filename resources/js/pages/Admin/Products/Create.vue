@@ -280,8 +280,18 @@ function submit() {
             toast.success('Product created successfully');
             router.visit('/admin/products');
         },
-        onError: () => {
-            toast.error('Please fix the errors in the form.');
+        onError: (errors) => {
+            if (errors) {
+                Object.values(errors).forEach((messageArray) => {
+                    if (Array.isArray(messageArray)) {
+                        messageArray.forEach((msg) => toast.error(msg));
+                    } else {
+                        toast.error(messageArray);
+                    }
+                });
+            } else {
+                toast.error('Something went wrong while submitting the form.');
+            }
         },
     });
 }
