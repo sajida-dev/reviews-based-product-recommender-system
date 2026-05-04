@@ -4,12 +4,15 @@ import DarkProductCard from '@/components/DarkProductCard.vue'
 import { usePage } from '@inertiajs/vue3'
 import type { Product } from '@/types/product'
 import { mapProducts } from '@/types/product'
+import { computed } from 'vue'
 
-const page = usePage()
+const page = usePage<{ filters?: { search?: string; category_id?: string } }>()
 
 const rawProducts = page.props.products?.data ?? []
 
 const products: Product[] = mapProducts(rawProducts)
+
+const activeSearch = computed(() => page.props.filters?.search?.trim() || '')
 </script>
 
 <template>
@@ -18,8 +21,15 @@ const products: Product[] = mapProducts(rawProducts)
             { label: 'Shop Now', href: '/products', primary: true },
             { label: 'Contact Us', href: '/contact' }
         ]">
+        <div class="container mx-auto px-4 py-8">
+            <p v-if="activeSearch" class="mb-4 text-sm text-gray-300">
+                Results for
+                <span class="font-semibold text-primary">“{{ activeSearch }}”</span>
+                — name, description, category, or brand.
+            </p>
+        </div>
         <!-- product listing -->
-        <div class="container mx-auto py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="container mx-auto pb-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <DarkProductCard v-for="product in products" :key="product.id" :product="product" />
         </div>
     </PublicLayout>

@@ -10,6 +10,8 @@ use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\Settings\SocialLoginController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Middleware\ForceTwoFactorSetup;
 use App\Http\Middleware\AdminMiddleware;
 use App\Services\ProductService;
@@ -56,9 +58,7 @@ Route::get('auth/facebook/callback', [SocialLoginController::class, 'handleFaceb
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard for all users
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Cart
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -88,6 +88,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 Route::middleware(['auth', 'verified', ForceTwoFactorSetup::class, AdminMiddleware::class])->group(function () {
+
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
     // Admin product listing (dashboard)
     Route::get('/admin/products', [ProductController::class, 'adminIndex'])->name('admin.products.index');

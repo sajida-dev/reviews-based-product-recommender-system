@@ -14,7 +14,8 @@
                 <!-- Main Image -->
                 <div class="relative w-[35vw] h-[34vw] border-2 border-primary overflow-hidden rounded-xl cursor-zoom-in"
                     ref="mainImageContainer" @mousemove="onMouseMove" @mouseleave="resetZoom">
-                    <img :src="selectedImage" class="w-full h-full object-cover" />
+                    <img :src="selectedImage" class="w-full h-full object-cover" loading="lazy"
+                        @error="onGalleryImgError" />
 
                     <!-- Zoom lens -->
                     <div v-if="isZooming"
@@ -103,10 +104,22 @@
             </section>
         </main>
 
-        <!-- Recommended Products -->
-        <!-- <section class="mt-16">
-        <RecommendedProducts :currentProductId="product.id" />
-    </section> -->
+        <!-- Similar / recommended products -->
+        <section
+            class="mt-16 min-w-8xl mx-15 px-4 rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm">
+            <div class="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h3 class="text-xl font-bold text-white">Recommended for you</h3>
+                    <p class="text-sm text-gray-400">Similar items, trending picks, and popular electronics.</p>
+                </div>
+            </div>
+            <div v-if="similarProducts.length" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <RecommendationExplainerCard v-for="p in similarProducts" :key="p.id" :product="p" />
+            </div>
+            <p v-else class="rounded-lg border border-dashed border-white/20 py-10 text-center text-gray-400">
+                No related products yet. Browse the shop — recommendations update as the catalog grows.
+            </p>
+        </section>
 
         <!-- Product Reviews -->
         <section class="mt-16">
@@ -116,20 +129,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Head, usePage } from '@inertiajs/vue3'
 import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, MinusIcon, ShoppingCartIcon } from 'lucide-vue-next'
-import RecommendedProducts from '@/components/RecommendedProducts.vue'
+import RecommendationExplainerCard from '@/components/RecommendationExplainerCard.vue'
 import ProductReviews from '@/components/ProductReviews.vue'
 import PublicLayout from '@/layouts/PublicLayout.vue'
+import type { RecommendationProduct } from '@/types/recommendation'
 
-const page = usePage<any>()
+const page = usePage<{ similarProducts?: RecommendationProduct[] }>()
 const product = page.props.product
 const reviews = page.props.initialReviews
+const similarProducts = computed(() => page.props.similarProducts ?? [])
 
 // Image gallery
 const selectedIndex = ref(product.images.findIndex((i: any) => i.is_primary) || 0)
-const selectedImage = computed(() => product.images[selectedIndex.value]?.url || '')
+const galleryFallback = '/img/default.png'
+const galleryOverride = ref<string | null>(null)
+const selectedImage = computed(
+    () => galleryOverride.value ?? product.images[selectedIndex.value]?.url ?? galleryFallback,
+)
+
+watch(selectedIndex, () => {
+    galleryOverride.value = null
+})
+
+function onGalleryImgError() {
+    galleryOverride.value = galleryFallback
+}
 
 // Thumbnail scroll
 const thumbContainer = ref<HTMLDivElement | null>(null)

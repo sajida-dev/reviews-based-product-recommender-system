@@ -3,6 +3,7 @@ import { ref, onMounted, reactive } from 'vue'
 import AppLogo from '@/components/AppLogo.vue'
 import { dashboard, login, logout, register } from '@/routes'
 import { Link, usePage, router } from '@inertiajs/vue3'
+import { Search } from 'lucide-vue-next'
 import MegaMenu from '../navigation/MegaMenu.vue'
 import { useShopStore } from '@/stores/useShopStore'
 import { storeToRefs } from 'pinia'
@@ -66,6 +67,17 @@ onMounted(() => {
 })
 const openSubmenus = reactive<Record<string, boolean>>({})
 
+const searchQ = ref('')
+
+function runProductSearch() {
+    const q = searchQ.value.trim()
+    if (!q) {
+        router.get('/products')
+        return
+    }
+    router.get('/products', { search: q }, { preserveState: true })
+}
+
 function toggleSubmenu(key: string) {
     if (openSubmenus[key]) {
         openSubmenus[key] = false
@@ -105,14 +117,16 @@ function toggleSubmenu(key: string) {
             </Link>
         </div>
 
-        <!-- Center: Menu - Desktop only -->
-        <nav class="hidden md:flex items-center gap-6 text-white/80 font-medium">
-            <Link href="/" class="hover:text-white transition">Home</Link>
-            <MegaMenu />
-            <Link href="/features" class="hover:text-white transition">Features</Link>
-            <Link href="/about" class="hover:text-white transition">About</Link>
-            <Link href="/contact" class="hover:text-white transition">Contact</Link>
-        </nav>
+        <!-- Center: Menu + search - Desktop -->
+        <div class="hidden md:flex flex-1 items-center justify-center gap-4 max-w-3xl mx-2">
+            <nav class="flex shrink-0 items-center gap-5 text-white/80 font-medium text-sm">
+                <Link href="/" class="hover:text-white transition">Home</Link>
+                <MegaMenu />
+                <Link href="/features" class="hover:text-white transition">Features</Link>
+                <Link href="/about" class="hover:text-white transition">About</Link>
+                <Link href="/contact" class="hover:text-white transition">Contact</Link>
+            </nav>
+        </div>
 
         <!-- Right: Auth + Cart + Wishlist -->
         <div class="flex items-center gap-3 relative">
@@ -133,7 +147,7 @@ function toggleSubmenu(key: string) {
                     Log in
                 </Link>
 
-                <Link  :href="register()" class="rounded-full border border-white/40
+                <Link :href="register()" class="rounded-full border border-white/40
                  px-5 py-2 text-sm font-semibold text-white
                  hover:bg-white/20 transition">
                     Register

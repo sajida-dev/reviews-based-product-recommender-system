@@ -10,7 +10,9 @@
             class="p-1 flex justify-center items-center bg-neutral-800 overflow-hidden">
             <img :src="mainImage"
                 class="h-70 w-full object-cover rounded-lg transition-transform duration-300 hover:scale-105"
-                alt="product" />
+                alt="product"
+                loading="lazy"
+                @error="onMainImgError" />
         </Link>
 
         <!-- Thumbnails -->
@@ -20,7 +22,7 @@
                     'border-primary': mainImage === img,
                     'border-neutral-700': mainImage !== img
                 }">
-                <img :src="img" class="h-10 w-10 rounded-md object-cover" />
+                <img :src="img" class="h-10 w-10 rounded-md object-cover" loading="lazy" @error="($e) => (($e.target as HTMLImageElement).src = '/img/default.png')" />
             </div>
         </div>
 
@@ -114,6 +116,12 @@ watch(
         if (val) mainImage.value = val
     }
 )
+
+const PLACEHOLDER = '/img/default.png'
+
+function onMainImgError() {
+    mainImage.value = PLACEHOLDER
+}
 
 /* 
    Wishlist

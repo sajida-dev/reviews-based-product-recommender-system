@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Http\Resources\ProductRecommendationResource;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\UserProductView;
 use App\Services\ProductService;
+use App\Services\RecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -35,13 +38,32 @@ class ProductController extends Controller
     }
 
     /** Public product detail (slug) */
-    public function showBySlug(string $slug)
+    public function showBySlug(string $slug, RecommendationService $recommendationService, Request $request)
     {
         $product = $this->service->findBySlug($slug);
+
+        if ($request->user()) {
+            UserProductView::updateOrCreate(
+                [
+                    'user_id' => $request->user()->id,
+                    'product_id' => $product->id,
+                ],
+                ['viewed_at' => now()]
+            );
+        } else {
+            $viewed = session('guest_viewed_products', []);
+            if (! in_array($product->id, $viewed, true)) {
+                $viewed[] = $product->id;
+                session(['guest_viewed_products' => array_values(array_unique(array_slice($viewed, -30)))]);
+            }
+        }
+
+        $similar = $recommendationService->getSimilarProducts($product, 8, $request->user());
 
         return Inertia::render('Products/Show', [
             'product' => $product,
             'initialReviews' => $product->reviews,
+            'similarProducts' => ProductRecommendationResource::collection($similar)->resolve(),
         ]);
     }
 
@@ -105,7 +127,7 @@ class ProductController extends Controller
 
     public function update(UpdateProductRequest $request, int $id)
     {
-        $this->authorize('update', Product::class);
+        $this->authorize('update', Product::findOrFail($id));
         Log::info('Product update request', [
             'user_id' => $request->user()->id,
             'product_id' => $id,

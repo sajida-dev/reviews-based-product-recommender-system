@@ -48,6 +48,18 @@ withDefaults(
                     {{ heroSubtitle }}
                 </p>
 
+                <!-- HERO SEARCH (only here, not in header) -->
+                <form action="/products" method="get" class="mt-8">
+                    <div class="mx-auto max-w-2xl flex gap-2">
+                        <input name="search" type="search"
+                            placeholder="Search for products like 'white sneakers', 'headphones'..."
+                            class="w-full rounded-full px-4 border-
+                            white/20 bg-white/30 py-3 text-neutral-100 placeholder:text-neutral-100 focus:outline-none" />
+                        <button type="submit"
+                            class="rounded-full px-5 py-3 bg-primary text-white font-semibold">Search</button>
+                    </div>
+                </form>
+
                 <div v-if="heroButtons.length" class="mt-8 flex gap-4 justify-center">
                     <Link v-for="(btn, index) in heroButtons" :key="index" :href="btn.href"
                         class="rounded-full px-6 py-3 text-sm font-semibold transition cursor-pointer" :class="btn.primary

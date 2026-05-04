@@ -37,6 +37,32 @@ class ProductImage extends Model
      */
     public function getUrlAttribute(): string
     {
-        return Storage::url($this->image_path);
+        return self::resolvePublicUrl($this->image_path);
+    }
+
+    /**
+     * External URLs (https://…) must be used as-is. Relative paths use the public disk.
+     */
+    public static function resolvePublicUrl(?string $path): string
+    {
+        if ($path === null || $path === '') {
+            return asset('img/default.png');
+        }
+
+        $path = trim($path);
+
+        if (preg_match('#^https?://#i', $path)) {
+            return $path;
+        }
+
+        if (str_starts_with($path, '//')) {
+            return 'https:'.$path;
+        }
+
+        if (str_starts_with($path, '/')) {
+            return url($path);
+        }
+
+        return Storage::disk('public')->url($path);
     }
 }

@@ -45,66 +45,26 @@
             </div> -->
 
             <transition-group name="fade" tag="div" class="space-y-6">
-                <div v-for="r in reviews" :key="r.id"
-                    class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 hover:scale-[1.01] hover:shadow-lg transition-transform duration-200 relative">
-
-                    <!-- Review Header -->
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-3">
-                            <img :src="r.user.avatar_url" alt="User avatar"
-                                class="w-10 h-10 rounded-full object-cover border-2 border-white/30" />
-                            <div>
-                                <span class="font-semibold text-white">{{ r.user.name }}</span>
-                                <div class="flex justify-between items-center text-gray-400 text-sm">
-                                    <span>{{ new Date(r.created_at).toLocaleDateString(undefined, {
-                                        year: 'numeric', month: 'short',
-                                        day: 'numeric'
-                                    }) }}</span>
-                                    <span v-if="r.spam_flagged" class="text-yellow-300 text-xs ml-2">(Under
-                                        moderation)</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Star rating -->
-                        <div class="flex items-center gap-1">
-                            <template v-for="i in 5">
-                                <svg v-if="i <= r.rating" xmlns="http://www.w3.org/2000/svg"
-                                    class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c..." />
-                                </svg>
-                                <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500"
-                                    fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c..." />
-                                </svg>
-                            </template>
-                        </div>
-                    </div>
-
-                    <p class="text-gray-200 mb-3 break-words whitespace-pre-wrap">{{ r.review }}</p>
-                </div>
+                <ReviewCard
+                    v-for="r in reviews"
+                    :key="r.id"
+                    :review="r"
+                    :show-moderation="!!page.props.auth?.user?.is_admin"
+                    class="hover:scale-[1.01] hover:shadow-lg transition-transform duration-200"
+                />
             </transition-group>
         </div>
     </section>
 </template>
 
 <script setup lang="ts">
+import ReviewCard from '@/components/ReviewCard.vue'
+import type { ReviewCardModel } from '@/types/review'
 import { ref, Ref } from 'vue'
 import { useForm, usePage } from '@inertiajs/vue3'
 
-interface User {
-    name: string
-    avatar_url: string
-    is_admin: boolean
-}
-
-interface Review {
-    id: number
-    review: string
-    rating: number
-    created_at: string
-    user: User
-    spam_flagged?: boolean
+interface Review extends ReviewCardModel {
+    user: NonNullable<ReviewCardModel['user']>
 }
 
 const page = usePage<any>()

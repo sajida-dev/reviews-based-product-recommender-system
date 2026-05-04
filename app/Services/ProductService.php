@@ -10,7 +10,10 @@ use Illuminate\Support\Str;
 
 class ProductService
 {
-    public function __construct(protected ProductImageService $imageService) {}
+    public function __construct(
+        protected ProductImageService $imageService,
+        protected SearchService $searchService,
+    ) {}
 
     /* =========================
        LISTING
@@ -29,9 +32,9 @@ class ProductService
             ->where('is_active', true)
             ->with(['category:id,name', 'images']);
 
-        $query->when($filters['search'] ?? null, fn($q, $v) => 
-            $q->where('name', 'like', "%{$v}%")
-        );
+        $query->when($filters['search'] ?? null, function ($q, $v) {
+            $this->searchService->applyProductSearch($q, (string) $v);
+        });
         
         $query->when($filters['category_id'] ?? null, fn($q, $v) => 
             $q->where('category_id', $v)
@@ -112,7 +115,7 @@ class ProductService
     {
         return Product::where('slug', $slug)
             ->where('is_active', true)
-            ->with(['category', 'images', 'reviews.user'])
+            ->with(['category', 'images', 'reviews.user', 'reviews.aspectSentiments'])
             ->firstOrFail();
     }
 

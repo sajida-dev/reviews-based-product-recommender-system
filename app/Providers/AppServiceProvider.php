@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\QdrantHttpClient;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
 
@@ -12,8 +13,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton('qdrant.client', fn () => QdrantHttpClient::fromConfig());
+
         Inertia::share([
-            'newReview' => fn() => session('newReview')
+            'newReview' => fn () => session('newReview'),
         ]);
     }
 

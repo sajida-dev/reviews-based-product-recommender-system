@@ -21,10 +21,10 @@ class WishlistController extends Controller
         ]);
     }
 
-    public function toggle(Request $request)
+    public function toggle(WishlistRequest $request)
     {
         $userId = $request->user()->id;
-        $productId = $request->input('product_id');
+        $productId = $request->validated('product_id');
 
         $wishlistItem = Wishlist::withTrashed()
             ->where('user_id', $userId)

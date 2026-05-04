@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
-use Exception;
 
 class Product extends Model
 {
@@ -49,7 +48,7 @@ class Product extends Model
     }
     public function orders()
     {
-        return $this->hasMany(OrderItem::class); 
+        return $this->hasMany(OrderItem::class);
     }
 
     public function images(): HasMany
@@ -70,10 +69,50 @@ class Product extends Model
         return $this->hasOne(ProductImage::class)->where('is_primary', true);
     }
 
-
-    public function isLowStock($threshold = 5)
+    /**
+     * Get the product's embedding (vector representation)
+     */
+    public function embedding(): HasMany
     {
-        return $this->quantity <= $threshold;
+        return $this->hasMany(Embedding::class);
+    }
+
+    /**
+     * Get the latest embedding
+     */
+    public function latestEmbedding()
+    {
+        return $this->hasOne(Embedding::class)->latest();
+    }
+
+    /**
+     * Get all aspect sentiments from reviews
+     */
+    public function aspectSentiments(): HasMany
+    {
+        return $this->hasMany(AspectSentiment::class);
+    }
+
+    /**
+     * Get recommendation logs for this product as the source
+     */
+    public function recommendationsAsSource(): HasMany
+    {
+        return $this->hasMany(RecommendationLog::class, 'product_id');
+    }
+
+    /**
+     * Get recommendation logs for this product as the recommendation
+     */
+    public function recommendationsAsTarget(): HasMany
+    {
+        return $this->hasMany(RecommendationLog::class, 'recommended_product_id');
+    }
+
+
+    public function isLowStock($threshold = 5): bool
+    {
+        return $this->stock <= $threshold;
     }
     /* Scopes */
     public function scopeSearch($q, $term)

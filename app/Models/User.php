@@ -61,6 +61,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'is_admin' => 'boolean',
         ];
     }
 
@@ -84,10 +85,26 @@ class User extends Authenticatable
         return $this->hasOne(Cart::class);
     }
 
+    public function profile(): HasOne
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    public function productViews(): HasMany
+    {
+        return $this->hasMany(UserProductView::class);
+    }
+
     /** Safely Creates User Cart */
     public function getOrCreateCart(): Cart
     {
         return $this->cart()->firstOrCreate([]);
+    }
+
+    /** Safely get or create user profile */
+    public function getOrCreateProfile(): UserProfile
+    {
+        return $this->profile()->firstOrCreate([]);
     }
 
     /** Check if admin */

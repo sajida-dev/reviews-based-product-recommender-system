@@ -34,18 +34,25 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
-    ...(user.value?.is_admin ?[
-         {
-        title: "Categories",
-        href: "/admin/categories",
-        icon: Folder,
-    },
-    {   
-        title: "Products",
-        href: "/admin/products",
-        icon: Package,
-    }
-    ] : [])
+    ...(user.value?.is_admin
+        ? [
+              {
+                  title: 'Admin home',
+                  href: '/admin/dashboard',
+                  icon: LayoutGrid,
+              },
+              {
+                  title: 'Categories',
+                  href: '/admin/categories',
+                  icon: Folder,
+              },
+              {
+                  title: 'Products',
+                  href: '/admin/products',
+                  icon: Package,
+              },
+          ]
+        : [])
    ,
     // {
     //     title: "Orders",

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Review extends Model
 {
@@ -35,6 +36,15 @@ class Review extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    /**
+     * Get the aspect sentiments from this review
+     */
+    public function aspectSentiments(): HasMany
+    {
+        return $this->hasMany(AspectSentiment::class);
+    }
+
     public function getAvatarUrlAttribute()
     {
         return $this->avatar ?? 'https://i.pravatar.cc/40?u=' . $this->id;
