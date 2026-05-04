@@ -256,7 +256,7 @@ const headers = [
 
 
 const breadcrumbItems: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Dashboard', href: '/admin/dashboard' },
     { title: 'Products', href: '/admin/products' },
 ];
 

@@ -73,6 +73,8 @@ class SocialLoginController extends Controller
         Auth::login($user);
         session()->regenerate();
 
-        return redirect('/dashboard');
+        return $user->is_admin
+            ? redirect('/admin/dashboard')
+            : redirect('/dashboard');
     }
 }

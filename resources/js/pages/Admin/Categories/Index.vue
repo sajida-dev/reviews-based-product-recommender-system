@@ -106,7 +106,7 @@ import TextInput from '@/components/form/TextInput.vue'
 import SelectInput from '@/components/form/SelectInput.vue'
 import { BreadcrumbItem } from '@/types'
 const breadcrumbItems: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Dashboard', href: '/admin/dashboard' },
     { title: 'Categories', href: '/admin/categories' },
 ];
 interface Category {

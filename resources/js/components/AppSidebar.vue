@@ -17,11 +17,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import {
     LayoutGrid,
     Folder,
-    ShoppingCart,
     Package,
-    ClipboardList,
-    Users,
-    Heart,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import { computed } from 'vue';
@@ -30,17 +26,12 @@ const user = computed(() => page.props.auth.user);
 
 const mainNavItems: NavItem[] = [
     {
-        title: "Dashboard",
-        href: dashboard(),
+        title: user.value?.is_admin ? 'Admin dashboard' : 'Dashboard',
+        href: user.value?.is_admin ? '/admin/dashboard' : dashboard(),
         icon: LayoutGrid,
     },
     ...(user.value?.is_admin
         ? [
-              {
-                  title: 'Admin home',
-                  href: '/admin/dashboard',
-                  icon: LayoutGrid,
-              },
               {
                   title: 'Categories',
                   href: '/admin/categories',
@@ -52,8 +43,7 @@ const mainNavItems: NavItem[] = [
                   icon: Package,
               },
           ]
-        : [])
-   ,
+        : []),
     // {
     //     title: "Orders",
     //     href: "/admin/orders",

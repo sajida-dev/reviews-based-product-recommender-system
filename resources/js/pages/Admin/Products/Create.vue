@@ -299,7 +299,7 @@ function submit() {
 function goBack() { router.visit('/admin/products'); }
 
 const breadcrumbItems: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Dashboard', href: '/admin/dashboard' },
     { title: 'Products', href: '/admin/products' },
     { title: 'Add Product', href: '/admin/products/create' },
 ];

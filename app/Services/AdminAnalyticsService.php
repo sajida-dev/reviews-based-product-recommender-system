@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Category;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\User;
@@ -31,6 +33,14 @@ class AdminAnalyticsService
                     ->withCount('products')
                     ->orderByDesc('products_count')
                     ->first()?->name,
+                'gross_revenue' => round((float) Order::query()
+                    ->whereIn('status', ['processing', 'shipped', 'delivered'])
+                    ->sum('total'), 2),
+                'delivered_orders' => Order::query()->where('status', 'delivered')->count(),
+                'cancelled_orders' => Order::query()->where('status', 'cancelled')->count(),
+                'items_sold' => (int) OrderItem::query()
+                    ->whereHas('order', fn ($q) => $q->whereIn('status', ['processing', 'shipped', 'delivered']))
+                    ->sum('quantity'),
             ],
             'reviews_per_day' => $this->reviewsPerDay(14),
             'sentiment_distribution' => $this->sentimentDistribution(),
