@@ -19,6 +19,8 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
             $table->unique(['cart_id', 'product_id']);
+            $table->index(['cart_id', 'product_id'], 'cart_items_cart_product_index');
+   
         });
     }
 

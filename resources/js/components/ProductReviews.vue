@@ -3,7 +3,7 @@
         <h3 class="text-2xl mb-5 font-bold text-white">Customer Reviews</h3>
 
         <!-- Submit Review -->
-        <form @submit.prevent="submit"
+        <form v-if="isAuthenticated" @submit.prevent="submit"
             class="flex flex-col gap-4 bg-white/20 backdrop-blur-md border-white/30 shadow-md border rounded-xl p-6">
 
             <h4 class="font-semibold text-white">Write a Review</h4>
@@ -12,6 +12,7 @@
                 class="border placeholder:text-white text-white border-gray-300 rounded-lg p-4 resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
                 rows="4"></textarea>
             <span v-if="form.errors.review" class="text-red-500 text-sm">{{ form.errors.review }}</span>
+            <span v-if="form.errors.product_id" class="text-red-500 text-sm">{{ form.errors.product_id }}</span>
 
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <label class="flex items-center gap-2 text-gray-100">
@@ -33,6 +34,12 @@
             <!-- Show moderation message -->
             <p v-if="moderationMessage" class="text-yellow-300 mt-2">{{ moderationMessage }}</p>
         </form>
+        <div
+            v-else
+            class="rounded-xl border border-white/30 bg-white/10 p-6 text-sm text-gray-100 backdrop-blur-md"
+        >
+            Please <a href="/login" class="font-semibold text-primary underline">sign in</a> to submit a review.
+        </div>
 
         <!-- Reviews List -->
         <div class="space-y-6">
@@ -69,6 +76,7 @@ interface Review extends ReviewCardModel {
 
 const page = usePage<any>()
 const props = defineProps<{ productId: number; initialReviews: Review[] }>()
+const isAuthenticated = !!page.props.auth?.user
 
 const reviews: Ref<Review[]> = ref(props.initialReviews || [])
 const moderationMessage = ref('')
@@ -98,7 +106,13 @@ const submit = () => {
             }
             form.reset('review', 'rating')
         },
-        onError: () => console.log('Validation failed'),
+        onError: (errors) => {
+            const firstError = Object.values(errors)[0]
+            if (typeof firstError === 'string') {
+                moderationMessage.value = firstError
+            }
+            console.log('Review submission errors:', errors)
+        },
         onFinish: () => window.scrollTo(0, scrollPos),
     })
 }

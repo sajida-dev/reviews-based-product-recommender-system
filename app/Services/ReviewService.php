@@ -5,10 +5,8 @@ namespace App\Services;
 use App\Models\Review;
 use App\Services\Moderation\SpamCheckService;
 use App\Services\Reviews\ReviewPreprocessor;
-use App\Services\Reviews\ReviewTextValidator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use RuntimeException;
 
 class ReviewService
 {
@@ -35,12 +33,27 @@ class ReviewService
         bool $isApproved = false
     ): Review {
         return DB::transaction(function () use ($userId, $productId, $rating, $review, $verifiedPurchase, $isApproved) {
+            $rawReview = is_string($review) ? trim($review) : null;
 
             // Preprocess text
-            $preprocessed = $this->preprocessor->preprocess($review);
+            $preprocessed = $rawReview !== null && $rawReview !== ''
+                ? $this->preprocessor->preprocess($rawReview)
+                : null;
 
             // Spam/toxicity check
-            $spamResult = $this->spamChecker->check($preprocessed);
+            $spamResult = ['flagged' => false];
+            if ($preprocessed !== null && $preprocessed !== '') {
+                try {
+                    $spamResult = $this->spamChecker->check($preprocessed);
+                } catch (\Throwable $e) {
+                    // Do not block checkout-critical user flow if moderation is temporarily down.
+                    Log::warning('Review moderation unavailable; saving review without spam flag.', [
+                        'user_id' => $userId,
+                        'product_id' => $productId,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
 
             // If flagged, mark as not approved
             $isApprovedFinal = $isApproved && !$spamResult['flagged'];
@@ -56,7 +69,7 @@ class ReviewService
                 [
                     'rating' => $rating,
                     'review' => $preprocessed, // store preprocessed for ML pipelines
-                    'raw_text' => $review,     // store original
+                    'raw_text' => $rawReview,  // store original
                     'verified_purchase' => $verifiedPurchase,
                     'is_approved' => $isApprovedFinal,
                     'spam_flagged' => $spamResult['flagged'] ?? false,

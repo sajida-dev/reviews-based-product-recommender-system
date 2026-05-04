@@ -6,9 +6,18 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ReviewRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $review = $this->input('review');
+
+        if (is_string($review) && trim($review) === '') {
+            $this->merge(['review' => null]);
+        }
+    }
+
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return true;
     }
 
     public function rules(): array
@@ -19,10 +28,29 @@ class ReviewRequest extends FormRequest
             'review' => [
                 'nullable',
                 'string',
-                'min:5',
                 'max:2000',
-                'not_regex:/https?:\/\//i',   // block URLs
-                'not_regex:/<[^>]*>/'         // block HTML
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    if (! is_string($value)) {
+                        return;
+                    }
+
+                    $text = trim($value);
+                    if ($text === '') {
+                        return;
+                    }
+
+                    if (mb_strlen($text) < 5) {
+                        $fail('Review text must be at least 5 characters.');
+                    }
+
+                    if (preg_match('/https?:\/\//i', $text)) {
+                        $fail('Links are not allowed in review text.');
+                    }
+
+                    if (preg_match('/<[^>]*>/', $text)) {
+                        $fail('HTML tags are not allowed in review text.');
+                    }
+                },
             ],
         ];
     }

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('stock')->default(0);
             $table->boolean('is_active')->default(true);
             $table->json('attributes')->nullable(); // color, size, etc.
+            $table->unsignedBigInteger('views')->default(0);
             $table->softDeletes();
             $table->timestamps();
             $table->index(['category_id', 'price']);

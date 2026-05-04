@@ -16,14 +16,17 @@ class Review extends Model
         'product_id',
         'rating',
         'review',
+        'raw_text',
         'verified_purchase',
-        'is_approved'
+        'is_approved',
+        'spam_flagged',
     ];
 
     protected $casts = [
         'rating' => 'integer',
         'verified_purchase' => 'boolean',
         'is_approved' => 'boolean',
+        'spam_flagged' => 'boolean',
     ];
     protected $with = ['user'];
 

@@ -28,6 +28,9 @@ return new class extends Migration
             $table->text('billing_address');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->index(['user_id', 'status', 'created_at'], 'orders_user_status_created_index');
+      
         });
     }
 

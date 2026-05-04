@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
             $table->softDeletes();
+            $table->index('user_id', 'carts_user_id_index');
+    
         });
     }
 

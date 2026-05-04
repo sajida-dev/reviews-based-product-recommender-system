@@ -4,6 +4,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use PragmaRX\Google2FA\Google2FA;
+use Database\Seeders\ProductSeeder;
 
 class DatabaseSeeder extends Seeder
 {

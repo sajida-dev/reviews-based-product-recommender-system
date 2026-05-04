@@ -27,6 +27,10 @@ return new class extends Migration
             $table->unique(['product_id', 'user_id']); // one review per user per product
             $table->index(['product_id', 'rating']);
             $table->softDeletes();
+
+            $table->index(['user_id', 'created_at'], 'reviews_user_created_index');
+            $table->index(['product_id', 'is_approved', 'created_at'], 'reviews_product_approved_index');
+     
         });
     }
 
